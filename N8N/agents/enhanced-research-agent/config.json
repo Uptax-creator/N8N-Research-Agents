@@ -1,0 +1,94 @@
+{
+  "agent_name": "enhanced-research-agent",
+  "version": "2.0.0",
+  "type": "langchain_agent",
+  "description": "Enhanced AI research agent with LangChain, multiple tools and memory",
+  "created_date": "2025-09-16",
+
+  "tools_config": {
+    "primary_llm": "openrouter",
+    "models": {
+      "openrouter": {
+        "model": "microsoft/wizardlm-2-8x22b",
+        "max_tokens": 4000,
+        "temperature": 0.7,
+        "top_p": 0.9
+      },
+      "gemma": {
+        "model": "google/gemma-2-27b-it",
+        "max_tokens": 3000,
+        "temperature": 0.6,
+        "top_p": 0.8
+      },
+      "fallback": {
+        "model": "meta-llama/llama-3.1-8b-instruct",
+        "max_tokens": 2000,
+        "temperature": 0.5
+      }
+    },
+    "search_tools": {
+      "serpapi": {
+        "priority": 1,
+        "use_for": ["general_search", "current_events", "facts", "statistics"],
+        "enabled": true
+      },
+      "perplexity": {
+        "priority": 2,
+        "use_for": ["research", "analysis", "technical_queries", "deep_research"],
+        "enabled": true,
+        "model": "llama-3.1-sonar-large-128k-online"
+      }
+    }
+  },
+
+  "memory_config": {
+    "type": "buffer_window",
+    "max_messages": 10,
+    "context_window": 4000,
+    "session_expiry_hours": 24
+  },
+
+  "input_validation": {
+    "required_fields": ["query"],
+    "optional_fields": ["research_type", "output_format", "session_id", "tools_preference", "depth"],
+    "max_query_length": 3000,
+    "supported_research_types": [
+      "comprehensive_research",
+      "executive_summary",
+      "technical_analysis",
+      "comparative_analysis",
+      "market_research",
+      "academic_research"
+    ],
+    "supported_output_formats": [
+      "research",
+      "summary",
+      "analysis",
+      "json",
+      "markdown"
+    ]
+  },
+
+  "output_formats": {
+    "research": "comprehensive_research_format",
+    "summary": "executive_summary_format",
+    "analysis": "detailed_analysis_format",
+    "comparison": "comparative_analysis_format",
+    "json": "structured_json_format",
+    "markdown": "markdown_format"
+  },
+
+  "quality_metrics": {
+    "min_sources": 3,
+    "confidence_threshold": 0.7,
+    "max_response_time_ms": 30000,
+    "source_diversity_required": true
+  },
+
+  "performance_targets": {
+    "response_time_ms": 15000,
+    "success_rate": 0.95,
+    "user_satisfaction": 0.90,
+    "cost_per_request": 0.10
+  }
+}
