@@ -1,0 +1,53 @@
+{
+  "agent_name": "ai-research-agent",
+  "version": "1.0.0",
+  "type": "ai_assistant",
+  "description": "AI-powered research assistant with multiple provider support",
+  "created_date": "2025-09-15",
+  "ai_providers": {
+    "primary": "claude",
+    "fallback": ["gemini", "perplexity"],
+    "routing_strategy": "capability_based"
+  },
+  "capabilities": [
+    "research",
+    "analysis",
+    "summarization",
+    "code_review",
+    "documentation"
+  ],
+  "input_validation": {
+    "required_fields": ["query", "context"],
+    "optional_fields": ["provider", "max_tokens", "temperature", "format"],
+    "max_query_length": 2000,
+    "supported_formats": ["text", "markdown", "json", "structured"]
+  },
+  "response_format": {
+    "success": {
+      "success": true,
+      "agent": "ai-research-agent",
+      "query": "string",
+      "result": "string",
+      "metadata": {
+        "provider_used": "string",
+        "tokens_used": "number",
+        "processing_time_ms": "number",
+        "confidence_score": "number"
+      },
+      "sources": ["array"],
+      "timestamp": "ISO datetime"
+    },
+    "error": {
+      "success": false,
+      "error": "string",
+      "message": "string",
+      "details": "object"
+    }
+  },
+  "performance_targets": {
+    "response_time_ms": 3000,
+    "success_rate": 0.95,
+    "cost_per_request": 0.05,
+    "accuracy_score": 0.90
+  }
+}
