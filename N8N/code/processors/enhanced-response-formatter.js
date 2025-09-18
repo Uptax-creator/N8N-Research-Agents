@@ -1,235 +1,166 @@
-// Enhanced Response Formatter v2.0
-// Formats LangChain AI Agent output into standardized research response
+// Enhanced Response Formatter v3.0 - Dynamic Multi-Agent
+// GitHub-driven agent configuration with automatic detection
+// Compatible with N8N workflow execution
 
-const startTime = Date.now();
-console.log('=== Enhanced Response Formatter v2.0 - Starting ===');
+// Get inputs from previous nodes with fallback
+const aiResponse = (() => {
+  try {
+    return $('Enhanced AI Agent').item.json || $('AI Agent').item.json;
+  } catch (e) {
+    console.log('Warning: AI Agent node not found, using current input');
+    return $json;
+  }
+})();
 
-// Get inputs from previous nodes
-const aiResponse = $('AI Agent').item.json;
-const processorData = $('Prompt Processor').item.json;
-const config = processorData.config;
-const prompts = processorData.prompts;
+const processorData = (() => {
+  try {
+    return $('Prompt Processor').item.json;
+  } catch (e) {
+    console.log('Warning: Prompt Processor not found, using defaults');
+    return { text: $json.query || 'Query not specified' };
+  }
+})();
 
-console.log('✅ AI Response received, length:', (aiResponse.output || aiResponse.text || '').length);
-console.log('✅ Research type:', processorData.research_type);
-console.log('✅ Output format:', processorData.output_format);
+// Try to load agent configuration from GitHub
+let agentConfig = null;
+try {
+  agentConfig = $('Load Agent Config').item.json;
+  console.log('✅ Agent config loaded from GitHub');
+} catch (e) {
+  console.log('⚠️ Agent config not found, using fallback detection');
+}
 
-// Extract AI response text
-const responseText = aiResponse.output || aiResponse.text || aiResponse.content || JSON.stringify(aiResponse);
+// Detect agent type from webhook path
+const webhookUrl = (() => {
+  if ($execution.mode === 'webhook') {
+    return $json.headers?.['x-forwarded-uri'] ||
+           $json.headers?.['x-webhook-url'] ||
+           $json.headers?.referer ||
+           '/webhook/business-plan-v4';
+  }
+  return '/webhook/business-plan-v4';
+})();
 
-// Advanced text parsing for structured extraction
-const parseResponseStructure = (text) => {
-    const sections = {
-        executive_summary: '',
-        key_findings: [],
-        detailed_analysis: '',
-        recommendations: [],
-        sources: [],
-        methodology: '',
-        evidence: '',
-        risks: []
-    };
-
-    const lines = text.split('\n');
-    let currentSection = '';
-    let currentContent = '';
-
-    for (const line of lines) {
-        const trimmedLine = line.trim();
-
-        // Detect section headers
-        if (trimmedLine.match(/^#+\s*(Executive Summary|Summary)/i)) {
-            if (currentSection) sections[currentSection] = currentContent.trim();
-            currentSection = 'executive_summary';
-            currentContent = '';
-        } else if (trimmedLine.match(/^#+\s*(Key Findings|Findings|Main Results)/i)) {
-            if (currentSection) sections[currentSection] = currentContent.trim();
-            currentSection = 'key_findings';
-            currentContent = '';
-        } else if (trimmedLine.match(/^#+\s*(Detailed Analysis|Analysis|Deep Dive)/i)) {
-            if (currentSection) sections[currentSection] = currentContent.trim();
-            currentSection = 'detailed_analysis';
-            currentContent = '';
-        } else if (trimmedLine.match(/^#+\s*(Recommendations|Suggestions)/i)) {
-            if (currentSection) sections[currentSection] = currentContent.trim();
-            currentSection = 'recommendations';
-            currentContent = '';
-        } else if (trimmedLine.match(/^#+\s*(Sources|References|Citations)/i)) {
-            if (currentSection) sections[currentSection] = currentContent.trim();
-            currentSection = 'sources';
-            currentContent = '';
-        } else if (trimmedLine.match(/^#+\s*(Methodology|Research Method)/i)) {
-            if (currentSection) sections[currentSection] = currentContent.trim();
-            currentSection = 'methodology';
-            currentContent = '';
-        } else if (trimmedLine.match(/^#+\s*(Risk|Limitations|Considerations)/i)) {
-            if (currentSection) sections[currentSection] = currentContent.trim();
-            currentSection = 'risks';
-            currentContent = '';
-        } else {
-            // Add content to current section
-            if (currentSection) {
-                currentContent += line + '\n';
-            } else if (!sections.executive_summary && trimmedLine) {
-                // If no section detected yet, treat as executive summary
-                sections.executive_summary += line + '\n';
-            }
-        }
-    }
-
-    // Don't forget the last section
-    if (currentSection && currentContent) {
-        sections[currentSection] = currentContent.trim();
-    }
-
-    // Convert text sections to arrays where appropriate
-    ['key_findings', 'recommendations', 'sources', 'risks'].forEach(arraySection => {
-        if (sections[arraySection] && typeof sections[arraySection] === 'string') {
-            sections[arraySection] = sections[arraySection]
-                .split('\n')
-                .filter(line => line.trim())
-                .map(line => line.replace(/^[-*•]\s*/, '').trim())
-                .filter(item => item.length > 0);
-        }
-    });
-
-    return sections;
+// Agent type mapping for multi-agent support
+const agentMapping = {
+  'business-plan': {
+    agent_type: 'business-plan',
+    name: 'Especialista em Planos de Negócio',
+    version: '4.0.0',
+    tools: ['langchain', 'gemini', 'business-analysis'],
+    specialization: 'Planos de negócio e estratégia empresarial'
+  },
+  'research-software': {
+    agent_type: 'research-software',
+    name: 'Pesquisador de Software',
+    version: '3.0.0',
+    tools: ['langchain', 'gemini', 'web-search', 'code-analysis'],
+    specialization: 'Análise e pesquisa de software'
+  },
+  'data-analysis': {
+    agent_type: 'data-analysis',
+    name: 'Analista de Dados',
+    version: '2.1.0',
+    tools: ['langchain', 'gemini', 'data-tools', 'visualization'],
+    specialization: 'Análise e visualização de dados'
+  },
+  'tax-optimization': {
+    agent_type: 'tax-optimization',
+    name: 'Especialista Tributário',
+    version: '1.5.0',
+    tools: ['langchain', 'gemini', 'tax-analysis', 'legal-search'],
+    specialization: 'Otimização tributária e planejamento fiscal'
+  },
+  'market-research': {
+    agent_type: 'market-research',
+    name: 'Pesquisador de Mercado',
+    version: '2.0.0',
+    tools: ['langchain', 'gemini', 'market-analysis', 'competitor-search'],
+    specialization: 'Pesquisa de mercado e análise competitiva'
+  }
 };
 
-// Parse the AI response
-const parsedSections = parseResponseStructure(responseText);
+// Extract agent type from webhook path
+const agentTypeMatch = webhookUrl.match(/\/webhook(?:-test)?\/([^-\/]+)/);
+const detectedType = agentTypeMatch ? agentTypeMatch[1] : 'business-plan';
 
-// Calculate quality metrics
-const calculateQualityMetrics = (parsed, requirements) => {
-    const sourceCount = parsed.sources.length;
-    const hasMinSources = sourceCount >= requirements.min_sources;
+console.log('🔍 Webhook URL:', webhookUrl);
+console.log('🎯 Detected Agent Type:', detectedType);
 
-    // Simple confidence calculation based on content quality
-    let confidenceScore = 0.5; // Base confidence
+// Use GitHub config or fallback to mapping
+const finalConfig = agentConfig || agentMapping[detectedType] || agentMapping['business-plan'];
 
-    if (parsed.executive_summary.length > 100) confidenceScore += 0.1;
-    if (parsed.key_findings.length >= 3) confidenceScore += 0.1;
-    if (parsed.detailed_analysis.length > 500) confidenceScore += 0.1;
-    if (parsed.recommendations.length >= 2) confidenceScore += 0.1;
-    if (hasMinSources) confidenceScore += 0.1;
+// Process AI response
+const result = (() => {
+  const response = aiResponse?.output ||
+                  aiResponse?.text ||
+                  aiResponse?.content ||
+                  aiResponse?.result ||
+                  'Resposta não disponível';
 
-    confidenceScore = Math.min(confidenceScore, 0.95); // Cap at 95%
+  // Clean up response if needed
+  if (typeof response === 'string') {
+    return response.trim();
+  }
+  return JSON.stringify(response, null, 2);
+})();
 
-    return {
-        source_count: sourceCount,
-        source_diversity: sourceCount >= 2, // Simple diversity check
-        fact_verification: sourceCount > 0,
-        expert_validation: parsed.detailed_analysis.length > 300,
-        currency_check: true, // Assume current since using real-time tools
-        confidence_score: Math.round(confidenceScore * 100) / 100,
-        completeness_score: Object.values(parsed).filter(v => v && v.length > 0).length / Object.keys(parsed).length
-    };
+// Calculate processing metrics
+const startTime = $execution.startedAt ? new Date($execution.startedAt).getTime() : Date.now();
+const processingTime = Math.max(Date.now() - startTime, 100);
+
+// Build dynamic response with rich metadata
+const dynamicResponse = {
+  success: true,
+  agent: finalConfig.agent_type || detectedType,
+  name: finalConfig.name || 'Agente Dinâmico',
+  version: finalConfig.version || '1.0.0',
+  specialization: finalConfig.specialization,
+  query: processorData?.text || $json.query || 'Consulta não especificada',
+  result: result,
+  metadata: {
+    agent_source: agentConfig ? 'github' : 'fallback',
+    webhook_path: webhookUrl,
+    detected_type: detectedType,
+    session_id: processorData?.session_id || `session_${Date.now()}`,
+    timestamp: new Date().toISOString(),
+    tools_used: finalConfig.tools || ['langchain', 'gemini'],
+    processing_time_ms: processingTime,
+    n8n_execution_id: $execution.id,
+    workflow_name: $workflow.name || 'dynamic-multi-agent',
+    execution_mode: $execution.mode
+  },
+  github_integration: {
+    status: agentConfig ? 'SUCCESS' : 'FALLBACK',
+    config_version: finalConfig.version,
+    config_url: agentConfig ?
+      `https://raw.githubusercontent.com/uptax-dev/n8n-orchestrator/main/prompts/agents/${detectedType}.json` :
+      null,
+    code_version: '3.0.0',
+    code_url: 'https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/code/processors/enhanced-response-formatter.js'
+  },
+  context_variables: finalConfig.context_variables || {
+    market_focus: 'Brasil',
+    target_audience: 'Empresas e Startups',
+    language: 'pt-BR'
+  },
+  performance: {
+    ai_processing_time: aiResponse?.processing_time || processingTime,
+    total_execution_time: processingTime,
+    tokens_used: aiResponse?.tokens || null,
+    model_used: aiResponse?.model || 'gemini-2.0-flash-exp'
+  }
 };
 
-const qualityMetrics = calculateQualityMetrics(parsedSections, processorData.quality_requirements);
+// Debug logging for development
+console.log('✅ Dynamic Response Generated:', {
+  webhook_url: webhookUrl,
+  detected_type: detectedType,
+  agent_config_found: !!agentConfig,
+  final_agent: dynamicResponse.agent,
+  response_length: result.length,
+  execution_id: $execution.id
+});
 
-// Detect tools used (simple heuristic)
-const detectToolsUsed = (responseText) => {
-    const tools = ['langchain_agent'];
-
-    if (responseText.includes('search') || responseText.includes('found') || responseText.includes('results')) {
-        tools.push('serpapi');
-    }
-    if (responseText.includes('research') || responseText.includes('analysis') || responseText.includes('according to')) {
-        tools.push('perplexity');
-    }
-
-    return tools;
-};
-
-const toolsUsed = detectToolsUsed(responseText);
-
-// Build standardized response based on output format
-const buildFormattedResponse = () => {
-    const baseResponse = {
-        success: true,
-        agent: config.agent_name,
-        version: config.version,
-        query: processorData.text.substring(0, 200) + '...', // Truncated query
-        research_type: processorData.research_type,
-        output_format: processorData.output_format
-    };
-
-    if (processorData.output_format === 'json') {
-        // Pure JSON structure
-        return {
-            ...baseResponse,
-            results: {
-                executive_summary: parsedSections.executive_summary,
-                key_findings: parsedSections.key_findings,
-                detailed_analysis: parsedSections.detailed_analysis,
-                recommendations: parsedSections.recommendations,
-                sources: parsedSections.sources,
-                methodology: parsedSections.methodology
-            },
-            metadata: {
-                tools_used: toolsUsed,
-                confidence_score: qualityMetrics.confidence_score,
-                processing_time_ms: Date.now() - startTime,
-                session_id: processorData.session_id,
-                source_count: qualityMetrics.source_count,
-                completeness_score: qualityMetrics.completeness_score
-            },
-            quality_metrics: {
-                source_diversity: qualityMetrics.source_diversity,
-                fact_verification: qualityMetrics.fact_verification,
-                expert_validation: qualityMetrics.expert_validation,
-                currency_check: qualityMetrics.currency_check
-            }
-        };
-    } else {
-        // Formatted text response with metadata
-        const template = prompts.output_templates[processorData.output_format + '_format'] ||
-                        prompts.output_templates.comprehensive_research_format;
-
-        const formattedResponse = template
-            .replace('{query}', processorData.text.substring(0, 100))
-            .replace('{executive_summary}', parsedSections.executive_summary)
-            .replace('{methodology}', parsedSections.methodology || 'Multi-tool research approach')
-            .replace('{key_findings}', parsedSections.key_findings.map((f, i) => `${i + 1}. ${f}`).join('\n'))
-            .replace('{detailed_analysis}', parsedSections.detailed_analysis)
-            .replace('{evidence}', 'Based on comprehensive source analysis')
-            .replace('{expert_insights}', 'Validated through multiple expert sources')
-            .replace('{recommendations}', parsedSections.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n'))
-            .replace('{implementation}', 'Follow recommendations in priority order')
-            .replace('{risks}', parsedSections.risks.join('\n') || 'Standard research limitations apply')
-            .replace('{sources}', parsedSections.sources.map((s, i) => `${i + 1}. ${s}`).join('\n'))
-            .replace('{confidence_score}', Math.round(qualityMetrics.confidence_score * 100))
-            .replace('{source_quality}', qualityMetrics.source_diversity ? 'High' : 'Moderate')
-            .replace('{completeness}', Math.round(qualityMetrics.completeness_score * 100) + '%');
-
-        return {
-            ...baseResponse,
-            result: formattedResponse,
-            metadata: {
-                tools_used: toolsUsed,
-                confidence_score: qualityMetrics.confidence_score,
-                processing_time_ms: Date.now() - startTime,
-                session_id: processorData.session_id,
-                quality_metrics: qualityMetrics
-            },
-            github_integration: {
-                status: 'SUCCESS',
-                config_version: config.version,
-                prompts_version: prompts.version,
-                template_used: processorData.output_format + '_format'
-            }
-        };
-    }
-};
-
-const finalResponse = buildFormattedResponse();
-
-const processingTime = Date.now() - startTime;
-console.log('✅ Response formatting completed in', processingTime, 'ms');
-console.log('✅ Output format:', processorData.output_format);
-console.log('✅ Confidence score:', qualityMetrics.confidence_score);
-console.log('✅ Sources found:', qualityMetrics.source_count);
-
-finalResponse.timestamp = new Date().toISOString();
-return [finalResponse];
+// Return formatted response
+return [dynamicResponse];
