@@ -1,0 +1,12 @@
+{
+  "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/agents/enhanced-research-agent/prompts.json",
+  "timestamp": 1758062113000,
+  "data": {
+    "system_prompts": {
+      "base_system": "You are a helpful research assistant with caching optimization."
+    },
+    "task_prompts": {
+      "comprehensive_research": "Research and analyze: {query} (cached when possible)"
+    }
+  }
+}

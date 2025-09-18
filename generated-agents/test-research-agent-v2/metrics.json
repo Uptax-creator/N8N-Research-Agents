@@ -1,0 +1,11 @@
+{
+        "agent_id": "test-research-agent-v2",
+        "metrics": {
+            "response_time_avg": 762,
+            "success_rate": 98,
+            "tokens_used": 1444,
+            "cost_per_request": 0.002,
+            "requests_today": 78
+        },
+        "collected_at": "2025-09-17T11:20:41-03:00"
+    }

@@ -1,0 +1,357 @@
+{
+  "name": "Enhanced Research Agent - LangChain + GitHub",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/enhanced-research-agent",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-enhanced",
+      "name": "Webhook Enhanced",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1400,
+        600
+      ],
+      "webhookId": "enhanced-research-agent-webhook"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/agents/enhanced-research-agent/config.json",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "load-enhanced-config",
+      "name": "Load GitHub Config",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1200,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/agents/enhanced-research-agent/prompts.json",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "load-enhanced-prompts",
+      "name": "Load GitHub Prompts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1000,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/code/processors/enhanced-prompt-processor.js",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "load-prompt-processor",
+      "name": "Load Prompt Processor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -800,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const githubConfig = $('Load GitHub Config').item.json.body || $('Load GitHub Config').item.json; const githubPrompts = $('Load GitHub Prompts').item.json.body || $('Load GitHub Prompts').item.json; const processorCode = $('Load Prompt Processor').item.json.data; const inputData = $('Webhook Enhanced').item.json.body; const executeFunction = new Function('$', 'console', 'Date', processorCode + '; return ' + processorCode.split('return [')[1].split('];')[0] + '];'); return executeFunction((nodeName) => ({ item: { json: nodeName === 'Load GitHub Config' ? { body: githubConfig } : nodeName === 'Load GitHub Prompts' ? { body: githubPrompts } : nodeName === 'Webhook Enhanced' ? { body: inputData } : {} } }), console, Date);"
+      },
+      "id": "prompt-processor",
+      "name": "Prompt Processor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -600,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "={{ $json.system_message }}"
+        }
+      },
+      "id": "enhanced-ai-agent",
+      "name": "Enhanced AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 4000
+        }
+      },
+      "id": "openai-model",
+      "name": "OpenAI Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        800
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "your-openai-credentials-id",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionKey": "={{ $json.session_id }}"
+      },
+      "id": "buffer-memory",
+      "name": "Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -400,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "gl": "us",
+          "hl": "en"
+        }
+      },
+      "id": "serpapi-tool",
+      "name": "SerpAPI Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        800
+      ],
+      "credentials": {
+        "serpApi": {
+          "id": "your-serpapi-credentials-id",
+          "name": "SerpAPI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/code/processors/enhanced-response-formatter.js",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "load-response-formatter",
+      "name": "Load Response Formatter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -200,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResponse = $('Enhanced AI Agent').item.json; const processorData = $('Prompt Processor').item.json; const formatterCode = $('Load Response Formatter').item.json.data; const executeFunction = new Function('$', 'console', 'Date', formatterCode + '; return ' + formatterCode.split('return [')[1].split('];')[0] + '];'); return executeFunction((nodeName) => ({ item: { json: nodeName === 'Enhanced AI Agent' ? aiResponse : nodeName === 'Prompt Processor' ? processorData : {} } }), console, Date);"
+      },
+      "id": "response-formatter",
+      "name": "Response Formatter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "options": {}
+      },
+      "id": "respond-enhanced",
+      "name": "Respond Enhanced",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        200,
+        600
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Enhanced": {
+      "main": [
+        [
+          {
+            "node": "Load GitHub Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load GitHub Config": {
+      "main": [
+        [
+          {
+            "node": "Load GitHub Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load GitHub Prompts": {
+      "main": [
+        [
+          {
+            "node": "Load Prompt Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Prompt Processor": {
+      "main": [
+        [
+          {
+            "node": "Prompt Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt Processor": {
+      "main": [
+        [
+          {
+            "node": "Enhanced AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enhanced AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Load Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Enhanced AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Enhanced AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Enhanced AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Response Formatter": {
+      "main": [
+        [
+          {
+            "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response Formatter": {
+      "main": [
+        [
+          {
+            "node": "Respond Enhanced",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateId": "enhanced-research-agent-v2",
+    "templateVersion": "2.0.0",
+    "description": "Enhanced AI Research Agent with LangChain integration, GitHub dynamic loading, and multi-tool support"
+  },
+  "pinData": {},
+  "active": false
+}

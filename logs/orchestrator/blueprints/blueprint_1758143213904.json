@@ -1,0 +1,104 @@
+{
+  "id": "blueprint_1758143213904",
+  "timestamp": "2025-09-17T21:06:53.904Z",
+  "userRequest": {
+    "agentType": "business-plan",
+    "userRequest": {
+      "success": true,
+      "optimizedRequest": {
+        "originalRequest": {
+          "ideia": "O objetivo é criar um plano de negócios para uma startup e a first que pretende atuar em estudos de reforma tributária no Brasil para serem implementados em pequenas e médias empresas no início de 2026.",
+          "mercado": "Pequenas e médias empresas no simples ",
+          "investimento": "baixo",
+          "objetivos": "Criar uma trilha que auxilie pequenas e médias empresas no mapeamento, diagnóstico, plano de ação, e comparação de regimes e qual as etapas de implementação da adoção da reforma tributária e qual a tecnologia necessária para que a empresa consiga se adaptar a esse novo modelo tributário implementado em 2026 com transição até 2032.\n\nTudo isso por meio do uso da tecnologia, por meio de agentes e ferramentas que auxiliem a empresa na adoção dessas boas práticas e evitem multas e penalidades que devem vir com essa nova com a reforma tributária.\n\nE permita a empresa lidar com esse modelo híbrido de gestão tributária do modelo anterior com o modelo novo, que vai permanecer por oito anos.",
+          "uploadedFiles": [
+            {
+              "file": {},
+              "id": 1758141970520.2178,
+              "name": "REFORMA_IMPACTOS_NOS_ERP_S_DETALHAMENTO_NOTAS_T_CNICAS_1757266233.pdf",
+              "size": 4763542,
+              "type": "application/pdf"
+            }
+          ],
+          "isMultimodal": true
+        },
+        "optimizedRequest": {
+          "ideia": "O objetivo é criar um plano de negócios para uma startup e a first que pretende atuar em estudos de reforma tributária no Brasil para serem implementados em pequenas e médias empresas no início de 2026.",
+          "mercado": "Pequenas e médias empresas no simples ",
+          "investimento": "baixo",
+          "objetivos": "Criar uma trilha que auxilie pequenas e médias empresas no mapeamento, diagnóstico, plano de ação, e comparação de regimes e qual as etapas de implementação da adoção da reforma tributária e qual a tecnologia necessária para que a empresa consiga se adaptar a esse novo modelo tributário implementado em 2026 com transição até 2032.\n\nTudo isso por meio do uso da tecnologia, por meio de agentes e ferramentas que auxiliem a empresa na adoção dessas boas práticas e evitem multas e penalidades que devem vir com essa nova com a reforma tributária.\n\nE permita a empresa lidar com esse modelo híbrido de gestão tributária do modelo anterior com o modelo novo, que vai permanecer por oito anos.",
+          "uploadedFiles": [
+            {
+              "file": {},
+              "id": 1758141970520.2178,
+              "name": "REFORMA_IMPACTOS_NOS_ERP_S_DETALHAMENTO_NOTAS_T_CNICAS_1757266233.pdf",
+              "size": 4763542,
+              "type": "application/pdf"
+            }
+          ],
+          "isMultimodal": true,
+          "enhancedObjectives": [
+            "Objetivo principal clarificado e detalhado",
+            "Objetivos secundários identificados",
+            "Métricas de sucesso definidas"
+          ],
+          "detailedRequirements": {
+            "functional": "Requisitos funcionais detalhados baseados no contexto",
+            "technical": "Especificações técnicas apropriadas para o domínio",
+            "quality": "Critérios de qualidade mensuráveis",
+            "constraints": "Limitações e restrições identificadas"
+          },
+          "successCriteria": [
+            "Completude: 100% dos requisitos atendidos",
+            "Qualidade: Padrões profissionais aplicados",
+            "Usabilidade: Interface intuitiva e funcional",
+            "Performance: Tempos de resposta adequados"
+          ],
+          "deliverableSpecs": [
+            "Documento técnico detalhado",
+            "Implementação funcional",
+            "Testes e validação",
+            "Documentação do usuário"
+          ],
+          "multimodalProcessing": {
+            "fileAnalysisRequired": true,
+            "visualContentExtraction": true,
+            "crossModalIntegration": true,
+            "recommendedLLM": "gemini-2.0-flash-multimodal"
+          }
+        },
+        "improvements": [
+          "Objetivos clarificados e detalhados",
+          "Requisitos expandidos e especificados",
+          "Métricas de qualidade adicionadas",
+          "Timeline e marcos estabelecidos"
+        ],
+        "estimatedComplexity": "Alta",
+        "estimatedDuration": "60-120 minutes",
+        "recommendedLLM": "Gemini 2.0 Multimodal",
+        "qualityScore": 75
+      },
+      "message": "Requisitos otimizados com sucesso"
+    },
+    "timestamp": "2025-09-17T21:06:53.898Z",
+    "sessionId": "session-1758143213904"
+  },
+  "analysis": {
+    "requestType": "general",
+    "complexity": "high",
+    "estimatedDuration": "60-120 minutes",
+    "requiredAgents": [
+      "general_agent"
+    ]
+  },
+  "objectives": [
+    "Complete user request successfully"
+  ],
+  "constraints": [
+    "Maintain high quality",
+    "Complete within estimated time"
+  ],
+  "deliverables": [
+    "Comprehensive solution document"
+  ]
+}

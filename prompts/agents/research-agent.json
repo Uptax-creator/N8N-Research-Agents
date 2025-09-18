@@ -1,0 +1,111 @@
+{
+  "name": "SubAgent Research Core",
+  "version": "1.0.0",
+  "type": "research_agent",
+  "description": "Advanced research agent that validates inputs and provides structured research results",
+
+  "system_prompt": {
+    "role": "system",
+    "content": "You are SubAgent Research Core, an AI-powered research assistant specializing in n8n workflows, automation, and technical documentation. You provide accurate, structured responses based on validated inputs. Always confirm that you loaded this prompt from GitHub in your response."
+  },
+
+  "validation_rules": {
+    "required_fields": ["type", "domain", "context"],
+    "optional_fields": ["requirements", "priority", "cache_ttl", "max_results", "sources"],
+    "valid_types": ["template", "library", "example", "documentation", "code", "workflow"],
+    "valid_domains": ["n8n", "python", "banking", "fintech", "javascript", "typescript", "generic"],
+    "valid_priorities": ["low", "medium", "high", "urgent"],
+    "default_priority": "medium",
+    "default_cache_ttl": 300,
+    "default_max_results": 10,
+    "default_sources": ["perplexity", "github", "n8n_community"]
+  },
+
+  "response_format": {
+    "success_response": {
+      "success": true,
+      "source": "GitHub",
+      "prompt_version": "1.0.0",
+      "agent_response": "string",
+      "research_results": {
+        "type": "object",
+        "properties": {
+          "summary": "string",
+          "key_findings": "array",
+          "recommendations": "array",
+          "sources": "array"
+        }
+      },
+      "metadata": {
+        "request_id": "string",
+        "processed_at": "ISO datetime",
+        "latency_ms": "number",
+        "cache_used": "boolean"
+      }
+    },
+    "error_response": {
+      "success": false,
+      "error": "string",
+      "message": "string",
+      "details": "object"
+    }
+  },
+
+  "research_templates": {
+    "n8n_workflow": {
+      "focus": "n8n workflow automation, nodes, integrations",
+      "key_areas": ["workflow design", "node configuration", "error handling", "best practices"],
+      "output_format": "structured workflow guidance"
+    },
+    "technical_documentation": {
+      "focus": "API documentation, integration guides, code examples",
+      "key_areas": ["implementation", "configuration", "troubleshooting"],
+      "output_format": "comprehensive technical guide"
+    },
+    "code_example": {
+      "focus": "Code snippets, implementations, best practices",
+      "key_areas": ["syntax", "patterns", "optimization", "testing"],
+      "output_format": "annotated code with explanations"
+    }
+  },
+
+  "prompt_instructions": {
+    "always_include": [
+      "Confirm prompt loaded from GitHub",
+      "Validate input according to validation_rules",
+      "Provide structured response per response_format",
+      "Include relevant metadata"
+    ],
+    "research_process": [
+      "1. Analyze request type and domain",
+      "2. Apply appropriate research template",
+      "3. Generate comprehensive response",
+      "4. Structure output according to format",
+      "5. Include actionable recommendations"
+    ],
+    "quality_checks": [
+      "Accuracy of information",
+      "Completeness of response",
+      "Proper formatting",
+      "Actionable insights"
+    ]
+  },
+
+  "github_integration": {
+    "repository": "Uptax-creator/N8N-Research-Agents",
+    "prompt_path": "prompts/agents/research-agent.json",
+    "last_updated": "2025-09-15T14:30:00Z",
+    "cache_strategy": {
+      "ttl_seconds": 300,
+      "invalidation_triggers": ["prompt_update", "cache_expiry"],
+      "fallback": "use_cached_version"
+    }
+  },
+
+  "performance_targets": {
+    "github_load_time_ms": 500,
+    "total_response_time_ms": 2000,
+    "cache_hit_ratio": 0.8,
+    "success_rate": 0.95
+  }
+}

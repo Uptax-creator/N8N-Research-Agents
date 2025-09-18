@@ -1,0 +1,5 @@
+{
+  "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/code/processors/enhanced-prompt-processor.js",
+  "timestamp": 1758062113000,
+  "data": "\n// Enhanced Prompt Processor with Cache Support v2.1\nconst startTime = Date.now();\nconst inputData = $('Webhook Enhanced').item.json.body;\nconst cachedResult = checkCache(inputData.query);\n\nif (cachedResult) {\n  console.log('🎯 Using cached result');\n  return [cachedResult];\n}\n\nconst result = {\n  text: inputData.query || 'Default query',\n  session_id: inputData.session_id || 'default',\n  system_message: 'You are a research assistant with caching.',\n  cache_metadata: {\n    cache_miss: true,\n    processing_time: Date.now() - startTime\n  }\n};\n\nstoreInCache(inputData.query, result);\nreturn [result];\n"
+}

@@ -1,0 +1,42 @@
+{
+  "name": "test-research-agent",
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": {
+        "path": "/test-research-agent-1758118824",
+        "responseMode": "lastNode"
+      },
+      "position": [
+        100,
+        100
+      ]
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini AI",
+      "type": "n8n-nodes-base.googleGemini",
+      "parameters": {
+        "modelName": "gemini-2.0-flash",
+        "temperature": 0.3,
+        "maxOutputTokens": 2000
+      },
+      "position": [
+        300,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "webhook": {
+      "main": [
+        [
+          "gemini"
+        ]
+      ]
+    }
+  },
+  "active": true
+}

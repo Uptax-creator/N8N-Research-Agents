@@ -1,0 +1,20 @@
+{
+  "agent_info": {
+    "name": "test-research-agent",
+    "version": "1.0.0",
+    "type": "research_specialist",
+    "description": "Specialized agent for research tasks and data analysis"
+  },
+  "webhook_config": {
+    "path": "/test-research-agent-1758118824",
+    "method": "POST"
+  },
+  "ai_config": {
+    "model": "gemini-2.0-flash",
+    "temperature": 0.3,
+    "maxTokens": 2000,
+    "systemMessage": "You are a specialized research assistant. Analyze queries and provide comprehensive research with sources and insights."
+  },
+  "created_at": 1758118824.354623,
+  "version": "1.0.0"
+}

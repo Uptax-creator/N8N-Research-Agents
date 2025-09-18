@@ -1,0 +1,80 @@
+[2025-09-17 11:20:24] [INFO] =
+[2025-09-17 11:20:24] [INFO] 🚀 AGENT FACTORY PIPELINE STARTED
+[2025-09-17 11:20:24] [INFO] Agent: test-research-agent | Template: research_specialist
+[2025-09-17 11:20:24] [INFO] =
+[2025-09-17 11:20:24] [INFO] Stage 1: CREATE - Generating agent: test-research-agent from template: research_specialist
+[2025-09-17 11:20:24] [SUCCESS] Agent configuration created: ./generated-agents/test-research-agent/config.json
+[2025-09-17 11:20:24] [SUCCESS] Workflow JSON generated: ./generated-agents/test-research-agent/workflow.json
+[2025-09-17 11:20:24] [INFO] Stage 2: DEPLOY - Deploying agent: test-research-agent
+[2025-09-17 11:20:24] [SUCCESS] Agent deployed with ID: deploy-1758118824
+[2025-09-17 11:20:24] [INFO] Webhook URL: https://primary-production-56785.up.railway.app/webhook/test-research-agent-1758118824
+[2025-09-17 11:20:24] [INFO] Stage 3: TEST - Testing agent: test-research-agent
+[2025-09-17 11:20:24] [INFO] Sending test request to: https://primary-production-56785.up.railway.app/webhook/test-research-agent-1758118824
+[2025-09-17 11:20:40] [INFO] =
+[2025-09-17 11:20:40] [INFO] 🚀 AGENT FACTORY PIPELINE STARTED
+[2025-09-17 11:20:40] [INFO] Agent: test-research-agent-v2 | Template: research_specialist
+[2025-09-17 11:20:40] [INFO] =
+[2025-09-17 11:20:40] [INFO] Stage 1: CREATE - Generating agent: test-research-agent-v2 from template: research_specialist
+[2025-09-17 11:20:40] [SUCCESS] Agent configuration created: ./generated-agents/test-research-agent-v2/config.json
+[2025-09-17 11:20:40] [SUCCESS] Workflow JSON generated: ./generated-agents/test-research-agent-v2/workflow.json
+[2025-09-17 11:20:40] [INFO] Stage 2: DEPLOY - Deploying agent: test-research-agent-v2
+[2025-09-17 11:20:40] [SUCCESS] Agent deployed with ID: deploy-1758118840
+[2025-09-17 11:20:40] [INFO] Webhook URL: https://primary-production-56785.up.railway.app/webhook/test-research-agent-v2-1758118840
+[2025-09-17 11:20:40] [INFO] Stage 3: TEST - Testing agent: test-research-agent-v2
+[2025-09-17 11:20:40] [INFO] Sending test request to: https://primary-production-56785.up.railway.app/webhook/test-research-agent-v2-1758118840
+[2025-09-17 11:20:41] [SUCCESS] All tests passed! Response time: 1500ms
+[2025-09-17 11:20:41] [INFO] Stage 4: MONITOR - Collecting metrics for: test-research-agent-v2
+[2025-09-17 11:20:41] [SUCCESS] Metrics collected and stored
+[2025-09-17 11:20:41] [SUCCESS] =
+[2025-09-17 11:20:41] [SUCCESS] ✅ PIPELINE COMPLETED SUCCESSFULLY
+[2025-09-17 11:20:41] [SUCCESS] Total time: 1s
+[2025-09-17 11:20:41] [SUCCESS] Agent test-research-agent-v2 is ready!
+[2025-09-17 11:20:41] [SUCCESS] =
+[2025-09-17 11:55:05] [INFO] =
+[2025-09-17 11:55:05] [INFO] =
+[2025-09-17 11:55:05] [INFO] =
+[2025-09-17 11:55:05] [INFO] 🚀 AGENT FACTORY PIPELINE STARTED
+[2025-09-17 11:55:05] [INFO] 🚀 AGENT FACTORY PIPELINE STARTED
+[2025-09-17 11:55:05] [INFO] 🚀 AGENT FACTORY PIPELINE STARTED
+[2025-09-17 11:55:05] [INFO] Agent: parallel-agent-1 | Template: data_processor
+[2025-09-17 11:55:05] [INFO] Agent: parallel-agent-3 | Template: data_processor
+[2025-09-17 11:55:05] [INFO] Agent: parallel-agent-2 | Template: data_processor
+[2025-09-17 11:55:05] [INFO] =
+[2025-09-17 11:55:05] [INFO] =
+[2025-09-17 11:55:05] [INFO] =
+[2025-09-17 11:55:05] [INFO] Stage 1: CREATE - Generating agent: parallel-agent-3 from template: data_processor
+[2025-09-17 11:55:05] [INFO] Stage 1: CREATE - Generating agent: parallel-agent-2 from template: data_processor
+[2025-09-17 11:55:05] [INFO] Stage 1: CREATE - Generating agent: parallel-agent-1 from template: data_processor
+[2025-09-17 11:55:05] [SUCCESS] Agent configuration created: ./generated-agents/parallel-agent-1/config.json
+[2025-09-17 11:55:05] [SUCCESS] Agent configuration created: ./generated-agents/parallel-agent-2/config.json
+[2025-09-17 11:55:05] [SUCCESS] Agent configuration created: ./generated-agents/parallel-agent-3/config.json
+[2025-09-17 11:55:05] [SUCCESS] Workflow JSON generated: ./generated-agents/parallel-agent-2/workflow.json
+[2025-09-17 11:55:05] [SUCCESS] Workflow JSON generated: ./generated-agents/parallel-agent-1/workflow.json
+[2025-09-17 11:55:05] [SUCCESS] Workflow JSON generated: ./generated-agents/parallel-agent-3/workflow.json
+[2025-09-17 11:55:05] [INFO] Stage 2: DEPLOY - Deploying agent: parallel-agent-2
+[2025-09-17 11:55:05] [INFO] Stage 2: DEPLOY - Deploying agent: parallel-agent-1
+[2025-09-17 11:55:05] [INFO] Stage 2: DEPLOY - Deploying agent: parallel-agent-3
+[2025-09-17 11:55:05] [SUCCESS] Agent deployed with ID: deploy-1758120905
+[2025-09-17 11:55:05] [SUCCESS] Agent deployed with ID: deploy-1758120905
+[2025-09-17 11:55:05] [SUCCESS] Agent deployed with ID: deploy-1758120905
+[2025-09-17 11:55:05] [INFO] Webhook URL: https://primary-production-56785.up.railway.app/webhook/parallel-agent-1-1758120905
+[2025-09-17 11:55:05] [INFO] Webhook URL: https://primary-production-56785.up.railway.app/webhook/parallel-agent-2-1758120905
+[2025-09-17 11:55:05] [INFO] Webhook URL: https://primary-production-56785.up.railway.app/webhook/parallel-agent-3-1758120905
+[2025-09-17 11:55:05] [INFO] Stage 3: TEST - Testing agent: parallel-agent-3
+[2025-09-17 11:55:05] [INFO] Stage 3: TEST - Testing agent: parallel-agent-1
+[2025-09-17 11:55:05] [INFO] Stage 3: TEST - Testing agent: parallel-agent-2
+[2025-09-17 11:55:05] [INFO] Sending test request to: https://primary-production-56785.up.railway.app/webhook/parallel-agent-3-1758120905
+[2025-09-17 11:55:05] [INFO] Sending test request to: https://primary-production-56785.up.railway.app/webhook/parallel-agent-1-1758120905
+[2025-09-17 11:55:05] [INFO] Sending test request to: https://primary-production-56785.up.railway.app/webhook/parallel-agent-2-1758120905
+[2025-09-17 11:55:06] [SUCCESS] All tests passed! Response time: 1500ms
+[2025-09-17 11:55:06] [SUCCESS] All tests passed! Response time: 1500ms
+[2025-09-17 11:55:06] [INFO] Stage 4: MONITOR - Collecting metrics for: parallel-agent-3
+[2025-09-17 11:55:06] [SUCCESS] All tests passed! Response time: 1500ms
+[2025-09-17 11:55:06] [INFO] Stage 4: MONITOR - Collecting metrics for: parallel-agent-2
+[2025-09-17 11:55:06] [INFO] Stage 4: MONITOR - Collecting metrics for: parallel-agent-1
+[2025-09-17 11:55:06] [SUCCESS] Metrics collected and stored
+[2025-09-17 11:55:06] [SUCCESS] =
+[2025-09-17 11:55:06] [SUCCESS] ✅ PIPELINE COMPLETED SUCCESSFULLY
+[2025-09-17 11:55:06] [SUCCESS] Total time: 1s
+[2025-09-17 11:55:06] [SUCCESS] Agent parallel-agent-2 is ready!
+[2025-09-17 11:55:06] [SUCCESS] =

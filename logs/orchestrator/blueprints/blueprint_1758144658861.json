@@ -1,0 +1,31 @@
+{
+  "id": "blueprint_1758144658861",
+  "timestamp": "2025-09-17T21:30:58.861Z",
+  "userRequest": {
+    "agentType": "research-software",
+    "userRequest": {
+      "objetivo": "Criar agente N8N para análise financeira",
+      "tecnologias": "N8N, JavaScript"
+    },
+    "timestamp": "2025-09-17T21:30:00.000Z",
+    "sessionId": "session-1758144658861"
+  },
+  "analysis": {
+    "requestType": "general",
+    "complexity": "low",
+    "estimatedDuration": "15-30 minutes",
+    "requiredAgents": [
+      "general_agent"
+    ]
+  },
+  "objectives": [
+    "Complete user request successfully"
+  ],
+  "constraints": [
+    "Maintain high quality",
+    "Complete within estimated time"
+  ],
+  "deliverables": [
+    "Comprehensive solution document"
+  ]
+}

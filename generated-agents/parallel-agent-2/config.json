@@ -1,0 +1,20 @@
+{
+  "agent_info": {
+    "name": "parallel-agent-2",
+    "version": "1.0.0",
+    "type": "data_processor",
+    "description": "Agent for data transformation and analysis"
+  },
+  "webhook_config": {
+    "path": "/parallel-agent-2-1758120905",
+    "method": "POST"
+  },
+  "ai_config": {
+    "model": "gemini-2.0-flash",
+    "temperature": 0.3,
+    "maxTokens": 2000,
+    "systemMessage": "You are a data processing specialist. Transform and analyze data efficiently."
+  },
+  "created_at": 1758120905.472374,
+  "version": "1.0.0"
+}

@@ -1,0 +1,105 @@
+{
+  "timestamp": "2025-09-16T14:54:02.974Z",
+  "workflow": {
+    "id": "wPy7vu3fF9RY3HfQ",
+    "name": "Enhanced Research Agent"
+  },
+  "summary": {
+    "totalExecutions": 2,
+    "successRate": "50.00%",
+    "avgDuration": "20000ms",
+    "totalErrors": 1
+  },
+  "performance": {
+    "totalExecutions": 2,
+    "successRate": "50.00",
+    "avgDuration": 20000,
+    "bottlenecks": [
+      {
+        "name": "Enhanced AI Agent",
+        "avgTime": 15000,
+        "totalTime": 15000,
+        "count": 1
+      },
+      {
+        "name": "Load GitHub Config",
+        "avgTime": 1200,
+        "totalTime": 1200,
+        "count": 1
+      },
+      {
+        "name": "Load GitHub Prompts",
+        "avgTime": 1100,
+        "totalTime": 1100,
+        "count": 1
+      }
+    ],
+    "recommendations": [
+      {
+        "type": "performance",
+        "priority": "high",
+        "node": "Enhanced AI Agent",
+        "issue": "AI processing averaging 15.0s",
+        "recommendation": "Implement request caching, reduce context size, or use faster Gemini model",
+        "impact": "Could reduce execution time by 40-60%"
+      },
+      {
+        "type": "caching",
+        "priority": "medium",
+        "node": "GitHub Loading Nodes",
+        "issue": "Multiple GitHub requests taking 1s+ each",
+        "recommendation": "Implement 5-minute cache for GitHub files, parallel loading",
+        "impact": "Could reduce GitHub loading time by 70-80%"
+      },
+      {
+        "type": "reliability",
+        "priority": "high",
+        "node": "Workflow Overall",
+        "issue": "Success rate only 50.00%",
+        "recommendation": "Add retry logic, timeout handling, and fallback mechanisms",
+        "impact": "Could improve success rate to 98%+"
+      }
+    ]
+  },
+  "errors": {
+    "totalErrors": 1,
+    "errorsByType": {
+      "network_timeout": 1
+    },
+    "errorsByNode": {
+      "Load GitHub Config": 1
+    },
+    "recommendations": [
+      {
+        "type": "error_handling",
+        "priority": "medium",
+        "issue": "1 network timeout errors detected",
+        "recommendation": "Increase timeout values, add retry logic with exponential backoff",
+        "code": "setTimeout: 10000, retries: 3, retryDelay: 1000"
+      }
+    ]
+  },
+  "priority_actions": [
+    {
+      "type": "performance",
+      "priority": "high",
+      "node": "Enhanced AI Agent",
+      "issue": "AI processing averaging 15.0s",
+      "recommendation": "Implement request caching, reduce context size, or use faster Gemini model",
+      "impact": "Could reduce execution time by 40-60%"
+    },
+    {
+      "type": "reliability",
+      "priority": "high",
+      "node": "Workflow Overall",
+      "issue": "Success rate only 50.00%",
+      "recommendation": "Add retry logic, timeout handling, and fallback mechanisms",
+      "impact": "Could improve success rate to 98%+"
+    }
+  ],
+  "mcp_integration": {
+    "n8n_mcp_used": true,
+    "components_analyzed": 2600,
+    "optimization_engine": "claude_code_mcp"
+  }
+}

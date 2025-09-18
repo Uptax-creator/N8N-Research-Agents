@@ -1,0 +1,11 @@
+{
+        "agent_id": "parallel-agent-2",
+        "metrics": {
+            "response_time_avg": 1475,
+            "success_rate": 91,
+            "tokens_used": 1209,
+            "cost_per_request": 0.002,
+            "requests_today": 82
+        },
+        "collected_at": "2025-09-17T11:55:06-03:00"
+    }

@@ -1,0 +1,68 @@
+{
+  "id": "blueprint_1758161493315",
+  "timestamp": "2025-09-18T02:11:33.315Z",
+  "userRequest": {
+    "agentType": "research-software",
+    "userRequest": {
+      "originalRequest": {
+        "objetivo": "Criar um sistema de análise de dados",
+        "tecnologias": "Python, Machine Learning"
+      },
+      "analysis": {
+        "clarity": 0.9923225031490228,
+        "completeness": 0.960430238041405,
+        "specificity": 0.8434748434028884,
+        "qualityScore": 93
+      },
+      "optimizedRequest": {
+        "enhancedObjectives": [
+          "Objetivo principal clarificado",
+          "Métricas de sucesso definidas"
+        ],
+        "detailedRequirements": {
+          "functional": "Requisitos funcionais baseados no contexto do agente",
+          "technical": "Especificações técnicas apropriadas",
+          "quality": "Critérios de qualidade mensuráveis"
+        },
+        "successCriteria": [
+          "Completude: 100%",
+          "Qualidade: Padrões profissionais"
+        ],
+        "deliverableSpecs": [
+          "Documento técnico",
+          "Implementação",
+          "Testes"
+        ]
+      },
+      "improvements": [
+        "Requisitos expandidos",
+        "Critérios definidos",
+        "Timeline estabelecida"
+      ],
+      "estimatedComplexity": "Média",
+      "estimatedDuration": "2-4 horas",
+      "recommendedLLM": "Gemini 2.0 Flash",
+      "aiGenerated": false
+    },
+    "timestamp": "2025-09-18T02:11:33.312Z",
+    "sessionId": "session-1758161493315"
+  },
+  "analysis": {
+    "requestType": "general",
+    "complexity": "high",
+    "estimatedDuration": "60-120 minutes",
+    "requiredAgents": [
+      "general_agent"
+    ]
+  },
+  "objectives": [
+    "Complete user request successfully"
+  ],
+  "constraints": [
+    "Maintain high quality",
+    "Complete within estimated time"
+  ],
+  "deliverables": [
+    "Comprehensive solution document"
+  ]
+}

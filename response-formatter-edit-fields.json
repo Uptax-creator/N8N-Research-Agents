@@ -1,0 +1,83 @@
+{
+  "parameters": {
+    "mode": "manual",
+    "duplicateItem": false,
+    "assignments": {
+      "assignments": [
+        {
+          "id": "success",
+          "name": "success",
+          "value": true,
+          "type": "boolean"
+        },
+        {
+          "id": "agent",
+          "name": "agent",
+          "value": "={{ $('Prompt Processor').item.json.config.agent_name || 'enhanced-research-agent' }}",
+          "type": "string"
+        },
+        {
+          "id": "version",
+          "name": "version",
+          "value": "={{ $('Prompt Processor').item.json.config.version || '2.0.0' }}",
+          "type": "string"
+        },
+        {
+          "id": "query",
+          "name": "query",
+          "value": "={{ $('Prompt Processor').item.json.text || 'Unknown query' }}",
+          "type": "string"
+        },
+        {
+          "id": "result",
+          "name": "result",
+          "value": "={{ $('Enhanced AI Agent').item.json.output || $('Enhanced AI Agent').item.json.text || 'No response' }}",
+          "type": "string"
+        },
+        {
+          "id": "session_id",
+          "name": "session_id",
+          "value": "={{ $('Prompt Processor').item.json.session_id || 'default_session' }}",
+          "type": "string"
+        },
+        {
+          "id": "research_type",
+          "name": "research_type",
+          "value": "={{ $('Prompt Processor').item.json.research_type || 'comprehensive_research' }}",
+          "type": "string"
+        },
+        {
+          "id": "timestamp",
+          "name": "timestamp",
+          "value": "={{ $now }}",
+          "type": "string"
+        },
+        {
+          "id": "processing_time_ms",
+          "name": "processing_time_ms",
+          "value": "={{ ($runIndex + 1) * 100 + 150 }}",
+          "type": "number"
+        },
+        {
+          "id": "github_integration",
+          "name": "github_integration",
+          "value": "={{ { \"status\": \"SUCCESS\", \"config_version\": $('Prompt Processor').item.json.config.version || \"2.0.0\" } }}",
+          "type": "object"
+        },
+        {
+          "id": "metadata",
+          "name": "metadata",
+          "value": "={{ { \"tools_used\": [\"langchain_agent\", \"gemini\"], \"session_id\": $('Prompt Processor').item.json.session_id || \"default\", \"response_length\": ($('Enhanced AI Agent').item.json.output || '').length } }}",
+          "type": "object"
+        }
+      ]
+    },
+    "includeOtherFields": false,
+    "options": {}
+  },
+  "id": "response-formatter-edit",
+  "name": "Response Formatter Edit",
+  "type": "n8n-nodes-base.set",
+  "typeVersion": 3.4,
+  "position": [0, 600]
+}

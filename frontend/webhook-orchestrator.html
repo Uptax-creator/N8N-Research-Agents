@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook Agent Orchestrator - n8n Multi-Agent Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Sidebar com Agent Library */
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            color: #ecf0f1;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .agent-item {
+            background: #34495e;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: move;
+            transition: all 0.3s ease;
+            color: #ecf0f1;
+        }
+
+        .agent-item:hover {
+            background: #3498db;
+            transform: translateX(5px);
+        }
+
+        .agent-item .type {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        /* Main Canvas Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: #fff;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Canvas */
+        #canvas {
+            flex: 1;
+            background: #f8f9fa;
+            background-image:
+                linear-gradient(rgba(200,200,200,0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(200,200,200,0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .agent-node {
+            position: absolute;
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 180px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: move;
+            transition: transform 0.2s;
+        }
+
+        .agent-node.running {
+            border-color: #f39c12;
+            animation: pulse 2s infinite;
+        }
+
+        .agent-node.success {
+            border-color: #27ae60;
+        }
+
+        .agent-node.error {
+            border-color: #e74c3c;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+            }
+            50% {
+                box-shadow: 0 2px 16px rgba(243, 156, 18, 0.6);
+            }
+            100% {
+                box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+            }
+        }
+
+        .agent-node .header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .agent-node .status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #95a5a6;
+        }
+
+        .agent-node.running .status {
+            background: #f39c12;
+        }
+
+        .agent-node.success .status {
+            background: #27ae60;
+        }
+
+        .agent-node.error .status {
+            background: #e74c3c;
+        }
+
+        .agent-node .webhook-url {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        .connection-line {
+            stroke: #3498db;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+
+        /* Inspector Panel */
+        .inspector {
+            width: 300px;
+            background: white;
+            border-left: 1px solid #e0e0e0;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .inspector h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .inspector pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+
+        /* Console */
+        .console {
+            height: 150px;
+            background: #1e1e1e;
+            color: #0f0;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            border-top: 2px solid #2c3e50;
+        }
+
+        .console .log-entry {
+            margin-bottom: 5px;
+        }
+
+        .console .timestamp {
+            color: #888;
+            margin-right: 10px;
+        }
+
+        /* Floating Action Buttons */
+        .fab-container {
+            position: fixed;
+            bottom: 180px;
+            right: 340px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+        }
+
+        /* SVG for connections */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar: Agent Library -->
+        <div class="sidebar">
+            <h2>🤖 Agent Library</h2>
+            <div id="agentLibrary">
+                <div class="agent-item" draggable="true" data-type="research_specialist">
+                    <div>🔍 Research Tools Agent</div>
+                    <div class="type">research_specialist</div>
+                </div>
+                <div class="agent-item" draggable="true" data-type="data_processor">
+                    <div>📊 Data Processing Agent</div>
+                    <div class="type">data_processor</div>
+                </div>
+                <div class="agent-item" draggable="true" data-type="content_generator">
+                    <div>✍️ Content Generator</div>
+                    <div class="type">content_generator</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <button class="btn btn-primary" onclick="testFlow()">
+                    ▶️ Test Flow
+                </button>
+                <button class="btn btn-success" onclick="deployAll()">
+                    🚀 Deploy All
+                </button>
+                <button class="btn btn-danger" onclick="clearCanvas()">
+                    🗑️ Clear
+                </button>
+                <span style="margin-left: auto; color: #7f8c8d;">
+                    Agents: <span id="agentCount">0</span> |
+                    Connections: <span id="connectionCount">0</span>
+                </span>
+            </div>
+
+            <!-- Canvas -->
+            <div id="canvas" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <svg id="connectionsSvg">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                                refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#3498db" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <!-- Console -->
+            <div class="console" id="console">
+                <div class="log-entry">
+                    <span class="timestamp">19:45:00</span>
+                    <span>System initialized. Ready to orchestrate agents...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inspector Panel -->
+        <div class="inspector">
+            <h3>📋 Inspector</h3>
+            <div id="inspectorContent">
+                <p style="color: #95a5a6;">Select an agent to inspect</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Buttons -->
+    <div class="fab-container">
+        <div class="fab btn-primary" onclick="zoomIn()" title="Zoom In">➕</div>
+        <div class="fab btn-primary" onclick="zoomOut()" title="Zoom Out">➖</div>
+    </div>
+
+    <script>
+        // Global state
+        let agents = [];
+        let connections = [];
+        let selectedAgent = null;
+        let zoomLevel = 1;
+        let agentIdCounter = 0;
+        let isDragging = false;
+        let draggedElement = null;
+
+        // Initialize drag and drop
+        document.querySelectorAll('.agent-item').forEach(item => {
+            item.addEventListener('dragstart', dragStart);
+        });
+
+        function dragStart(e) {
+            e.dataTransfer.setData('agentType', e.target.dataset.type);
+            e.dataTransfer.setData('agentName', e.target.innerText);
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const agentType = e.dataTransfer.getData('agentType');
+            const agentName = e.dataTransfer.getData('agentName');
+
+            const rect = document.getElementById('canvas').getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            createAgent(agentName, agentType, x, y);
+        }
+
+        function createAgent(name, type, x, y) {
+            const agentId = `agent-${agentIdCounter++}`;
+            const agentNode = document.createElement('div');
+            agentNode.className = 'agent-node';
+            agentNode.id = agentId;
+            agentNode.style.left = `${x}px`;
+            agentNode.style.top = `${y}px`;
+
+            const webhookUrl = `/workflow/${type}-${agentIdCounter}`;
+
+            agentNode.innerHTML = `
+                <div class="header">
+                    <span>${name.split(' ')[0]} ${name.split(' ')[1]}</span>
+                    <div class="status"></div>
+                </div>
+                <div class="webhook-url">${webhookUrl}</div>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-primary" style="padding: 4px 8px; font-size: 11px;"
+                            onclick="connectAgent('${agentId}')">Connect →</button>
+                </div>
+            `;
+
+            agentNode.onclick = () => selectAgent(agentId);
+            makeDraggable(agentNode);
+
+            document.getElementById('canvas').appendChild(agentNode);
+
+            agents.push({
+                id: agentId,
+                name: name,
+                type: type,
+                webhook: webhookUrl,
+                x: x,
+                y: y,
+                status: 'idle'
+            });
+
+            updateCounters();
+            log(`Agent created: ${name} at (${Math.round(x)}, ${Math.round(y)})`);
+        }
+
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+                isDragging = true;
+                draggedElement = element;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+
+                updateConnections();
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+                isDragging = false;
+
+                // Update agent position in state
+                const agent = agents.find(a => a.id === element.id);
+                if (agent) {
+                    agent.x = parseInt(element.style.left);
+                    agent.y = parseInt(element.style.top);
+                }
+            }
+        }
+
+        let connectingFrom = null;
+
+        function connectAgent(agentId) {
+            if (!connectingFrom) {
+                connectingFrom = agentId;
+                log(`Connecting from ${agentId}... Click another agent to complete connection.`);
+                document.getElementById(agentId).classList.add('connecting');
+            } else {
+                if (connectingFrom !== agentId) {
+                    connections.push({
+                        from: connectingFrom,
+                        to: agentId
+                    });
+
+                    drawConnection(connectingFrom, agentId);
+                    log(`Connected: ${connectingFrom} → ${agentId}`);
+
+                    document.getElementById(connectingFrom).classList.remove('connecting');
+                    connectingFrom = null;
+
+                    updateCounters();
+                }
+            }
+        }
+
+        function drawConnection(fromId, toId) {
+            const svg = document.getElementById('connectionsSvg');
+            const fromEl = document.getElementById(fromId);
+            const toEl = document.getElementById(toId);
+
+            if (!fromEl || !toEl) return;
+
+            const fromX = parseInt(fromEl.style.left) + fromEl.offsetWidth / 2;
+            const fromY = parseInt(fromEl.style.top) + fromEl.offsetHeight / 2;
+            const toX = parseInt(toEl.style.left) + toEl.offsetWidth / 2;
+            const toY = parseInt(toEl.style.top) + toEl.offsetHeight / 2;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const d = `M ${fromX} ${fromY} L ${toX} ${toY}`;
+            path.setAttribute('d', d);
+            path.setAttribute('class', 'connection-line');
+            path.setAttribute('id', `conn-${fromId}-${toId}`);
+
+            svg.appendChild(path);
+        }
+
+        function updateConnections() {
+            const svg = document.getElementById('connectionsSvg');
+            svg.innerHTML = `
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                            refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#3498db" />
+                    </marker>
+                </defs>
+            `;
+
+            connections.forEach(conn => {
+                drawConnection(conn.from, conn.to);
+            });
+        }
+
+        function selectAgent(agentId) {
+            if (isDragging) return;
+
+            selectedAgent = agents.find(a => a.id === agentId);
+
+            // Update inspector
+            const inspector = document.getElementById('inspectorContent');
+            inspector.innerHTML = `
+                <h4>${selectedAgent.name}</h4>
+                <p><strong>Type:</strong> ${selectedAgent.type}</p>
+                <p><strong>Status:</strong> <span style="color: ${getStatusColor(selectedAgent.status)}">${selectedAgent.status}</span></p>
+                <p><strong>Webhook:</strong></p>
+                <pre>${selectedAgent.webhook}</pre>
+
+                <h5 style="margin-top: 15px;">Configuration:</h5>
+                <pre>${JSON.stringify({
+                    id: selectedAgent.id,
+                    model: "gemini-2.0-flash",
+                    temperature: 0.3,
+                    maxTokens: 2000,
+                    connections: connections.filter(c => c.from === agentId || c.to === agentId)
+                }, null, 2)}</pre>
+            `;
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'idle': return '#95a5a6';
+                case 'running': return '#f39c12';
+                case 'success': return '#27ae60';
+                case 'error': return '#e74c3c';
+                default: return '#95a5a6';
+            }
+        }
+
+        async function testFlow() {
+            if (agents.length === 0) {
+                alert('Add agents to test the flow!');
+                return;
+            }
+
+            log('Starting test flow...');
+
+            // Simulate flow execution
+            for (let agent of agents) {
+                const node = document.getElementById(agent.id);
+                node.classList.remove('success', 'error');
+                node.classList.add('running');
+                agent.status = 'running';
+
+                log(`Processing ${agent.name}...`);
+
+                await sleep(1500);
+
+                node.classList.remove('running');
+                node.classList.add('success');
+                agent.status = 'success';
+
+                log(`✓ ${agent.name} completed successfully`);
+            }
+
+            log('Test flow completed!');
+        }
+
+        async function deployAll() {
+            log('Deploying all agents to n8n...');
+
+            for (let agent of agents) {
+                log(`Deploying ${agent.name} to ${agent.webhook}...`);
+                await sleep(500);
+                log(`✓ ${agent.name} deployed successfully`);
+            }
+
+            log(`🚀 All ${agents.length} agents deployed!`);
+        }
+
+        function clearCanvas() {
+            if (confirm('Clear all agents and connections?')) {
+                document.querySelectorAll('.agent-node').forEach(node => node.remove());
+                document.getElementById('connectionsSvg').innerHTML = '';
+                agents = [];
+                connections = [];
+                agentIdCounter = 0;
+                updateCounters();
+                log('Canvas cleared');
+            }
+        }
+
+        function updateCounters() {
+            document.getElementById('agentCount').textContent = agents.length;
+            document.getElementById('connectionCount').textContent = connections.length;
+        }
+
+        function log(message) {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="timestamp">${timestamp}</span>
+                <span>${message}</span>
+            `;
+            console.appendChild(entry);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function zoomIn() {
+            zoomLevel = Math.min(zoomLevel + 0.1, 2);
+            document.getElementById('canvas').style.transform = `scale(${zoomLevel})`;
+        }
+
+        function zoomOut() {
+            zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
+            document.getElementById('canvas').style.transform = `scale(${zoomLevel})`;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Initialize
+        log('Dashboard initialized. Drag agents from the library to start building your workflow.');
+    </script>
+</body>
+</html>

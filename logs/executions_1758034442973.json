@@ -1,0 +1,87 @@
+[
+  {
+    "id": "exec_001",
+    "workflowId": "wPy7vu3fF9RY3HfQ",
+    "status": "success",
+    "startTime": "2025-09-16T14:49:02.973Z",
+    "endTime": "2025-09-16T14:49:22.973Z",
+    "duration": 20000,
+    "nodesExecuted": [
+      {
+        "name": "Webhook Enhanced",
+        "duration": 50,
+        "status": "success"
+      },
+      {
+        "name": "Load GitHub Config",
+        "duration": 1200,
+        "status": "success"
+      },
+      {
+        "name": "Load GitHub Prompts",
+        "duration": 1100,
+        "status": "success"
+      },
+      {
+        "name": "Load Prompt Processor",
+        "duration": 900,
+        "status": "success"
+      },
+      {
+        "name": "Prompt Processor",
+        "duration": 100,
+        "status": "success"
+      },
+      {
+        "name": "Enhanced AI Agent",
+        "duration": 15000,
+        "status": "success"
+      },
+      {
+        "name": "Response Formatter",
+        "duration": 50,
+        "status": "success"
+      },
+      {
+        "name": "Respond Enhanced",
+        "duration": 30,
+        "status": "success"
+      }
+    ],
+    "errors": [],
+    "data": {
+      "webhook_response_time": 17000,
+      "github_requests": 3,
+      "ai_processing_time": 15000,
+      "total_tokens_used": 2500
+    }
+  },
+  {
+    "id": "exec_002",
+    "workflowId": "wPy7vu3fF9RY3HfQ",
+    "status": "error",
+    "startTime": "2025-09-16T14:44:02.973Z",
+    "endTime": "2025-09-16T14:44:32.973Z",
+    "duration": 30000,
+    "nodesExecuted": [
+      {
+        "name": "Webhook Enhanced",
+        "duration": 60,
+        "status": "success"
+      },
+      {
+        "name": "Load GitHub Config",
+        "duration": 5000,
+        "status": "timeout"
+      }
+    ],
+    "errors": [
+      {
+        "node": "Load GitHub Config",
+        "message": "Request timeout after 5000ms",
+        "type": "network_timeout"
+      }
+    ],
+    "data": {}
+  }
+]

@@ -1,0 +1,21 @@
+{
+        "agent": "test-research-agent-v2",
+        "test_time": "2025-09-17T11:20:41-03:00",
+        "response_time_ms": 1500,
+        "tests": {
+            "response_time": {
+                "passed": true,
+                "value": 1500,
+                "threshold": 3000
+            },
+            "valid_json": {
+                "passed": true,
+                "message": "Response is valid JSON"
+            },
+            "no_errors": {
+                "passed": true,
+                "message": "No errors in logs"
+            }
+        },
+        "overall_status": "passed"
+    }

@@ -1,0 +1,46 @@
+{
+  "assignments": [
+    {
+      "id": "success-field",
+      "name": "success",
+      "value": true,
+      "type": "boolean"
+    },
+    {
+      "id": "query-field",
+      "name": "query",
+      "value": "={{ $input.item.json.text }}",
+      "type": "string"
+    },
+    {
+      "id": "result-field",
+      "name": "result",
+      "value": "={{ $input.item.json.output }}",
+      "type": "string"
+    },
+    {
+      "id": "session-field",
+      "name": "session_id",
+      "value": "={{ $input.item.json.session_id }}",
+      "type": "string"
+    },
+    {
+      "id": "timestamp-field",
+      "name": "timestamp",
+      "value": "={{ $now }}",
+      "type": "string"
+    },
+    {
+      "id": "agent-field",
+      "name": "agent",
+      "value": "enhanced-research-agent",
+      "type": "string"
+    },
+    {
+      "id": "version-field",
+      "name": "version",
+      "value": "2.0.0",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+        "deployment_id": "deploy-1758118840",
+        "agent_name": "test-research-agent-v2",
+        "webhook_url": "https://primary-production-56785.up.railway.app/webhook/test-research-agent-v2-1758118840",
+        "deployed_at": "2025-09-17T11:20:40-03:00",
+        "status": "active"
+    }

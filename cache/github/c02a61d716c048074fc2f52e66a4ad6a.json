@@ -1,0 +1,15 @@
+{
+  "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/agents/enhanced-research-agent/config.json",
+  "timestamp": 1758062113000,
+  "data": {
+    "agent_name": "enhanced-research-agent",
+    "version": "2.0.0",
+    "type": "research_agent",
+    "capabilities": [
+      "search",
+      "analysis",
+      "synthesis"
+    ],
+    "cache_enabled": true
+  }
+}

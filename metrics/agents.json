@@ -1,0 +1,27 @@
+{
+  "agents": {
+    "test-research-agent-v2": {
+      "response_time_avg": 762,
+      "success_rate": 98,
+      "tokens_used": 1444,
+      "cost_per_request": 0.002,
+      "requests_today": 78
+    },
+    "parallel-agent-3": {
+      "response_time_avg": 546,
+      "success_rate": 99,
+      "tokens_used": 1335,
+      "cost_per_request": 0.002,
+      "requests_today": 80
+    },
+    "parallel-agent-1": {
+      "response_time_avg": 637,
+      "success_rate": 90,
+      "tokens_used": 1084,
+      "cost_per_request": 0.002,
+      "requests_today": 83
+    }
+  },
+  "deployments": 3,
+  "success_rate": 100
+}

@@ -1,0 +1,125 @@
+{
+  "name": "Basic Test - Enhanced Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/basic-test-agent",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-basic",
+      "name": "Webhook Basic",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-1200, 400],
+      "webhookId": "basic-test-webhook"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/agents/enhanced-research-agent/config.json",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "load-config-basic",
+      "name": "Load Config",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-1000, 400]
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/agents/enhanced-research-agent/prompts.json",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "load-prompts-basic",
+      "name": "Load Prompts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-800, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Load Config').item.json.body; const prompts = $('Load Prompts').item.json.body; const inputData = $('Webhook Basic').item.json.body; const query = inputData.query || 'Test query'; const researchType = inputData.research_type || 'comprehensive_research'; const mockResponse = `# Research Results: ${query}\\n\\n## Analysis\\nThis is a mock analysis of: ${query}\\n\\n## GitHub Integration Status\\n- Config loaded: ${config.agent_name} v${config.version}\\n- Prompts loaded: ${Object.keys(prompts.task_prompts).length} templates\\n- Research type: ${researchType}\\n\\n## Mock Findings\\n1. GitHub dynamic loading working\\n2. Configuration parsed successfully\\n3. Prompt templates available\\n\\n## Confidence\\nHigh (95%) - System integration validated`; return [{ success: true, agent: config.agent_name, version: config.version, query: query, research_type: researchType, result: mockResponse, metadata: { github_integration: 'SUCCESS', config_version: config.version, prompts_count: Object.keys(prompts.task_prompts).length, processing_time_ms: 150 }, timestamp: new Date().toISOString() }];"
+      },
+      "id": "basic-processor",
+      "name": "Basic Processor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-600, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "options": {}
+      },
+      "id": "respond-basic",
+      "name": "Respond Basic",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [-400, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Basic": {
+      "main": [
+        [
+          {
+            "node": "Load Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Config": {
+      "main": [
+        [
+          {
+            "node": "Load Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Prompts": {
+      "main": [
+        [
+          {
+            "node": "Basic Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic Processor": {
+      "main": [
+        [
+          {
+            "node": "Respond Basic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false
+}

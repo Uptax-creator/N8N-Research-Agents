@@ -1,0 +1,7 @@
+{
+        "deployment_id": "deploy-1758120905",
+        "agent_name": "parallel-agent-1",
+        "webhook_url": "https://primary-production-56785.up.railway.app/webhook/parallel-agent-1-1758120905",
+        "deployed_at": "2025-09-17T11:55:05-03:00",
+        "status": "active"
+    }
