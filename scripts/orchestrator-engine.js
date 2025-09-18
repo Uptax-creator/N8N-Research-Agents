@@ -702,7 +702,7 @@ Responda APENAS em JSON válido no formato:
       'general-agent': '/webhook/enhanced-v2-final'
     };
 
-    const webhookPath = webhookPaths[agentType] || '/webhook/general-agent';
+    const webhookPath = webhookPaths[agentType] || '/webhook/enhanced-v2-final';
     const webhookUrl = `${n8nBaseUrl}${webhookPath}`;
 
     console.log(`🌐 Calling N8N webhook: ${webhookUrl}`);
