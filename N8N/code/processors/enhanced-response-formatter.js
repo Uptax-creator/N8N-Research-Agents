@@ -1,8 +1,8 @@
-// Enhanced Response Formatter v3.0 - Dynamic Multi-Agent
+// Enhanced Response Formatter v3.1 - Dynamic Multi-Agent
 // GitHub-driven agent configuration with automatic detection
-// Compatible with N8N workflow execution
+// Compatible with N8N workflow execution (N8N 1.108.2 compatible)
 
-// Get inputs from previous nodes with fallback
+// Get inputs from previous nodes with safe fallback
 const aiResponse = (() => {
   try {
     return $('Enhanced AI Agent').item.json || $('AI Agent').item.json;
@@ -90,7 +90,7 @@ console.log('🎯 Detected Agent Type:', detectedType);
 // Use GitHub config or fallback to mapping
 const finalConfig = agentConfig || agentMapping[detectedType] || agentMapping['business-plan'];
 
-// Process AI response
+// Process AI response safely
 const result = (() => {
   const response = aiResponse?.output ||
                   aiResponse?.text ||
@@ -109,7 +109,7 @@ const result = (() => {
 const startTime = $execution.startedAt ? new Date($execution.startedAt).getTime() : Date.now();
 const processingTime = Math.max(Date.now() - startTime, 100);
 
-// Build dynamic response with rich metadata
+// Build dynamic response with rich metadata (N8N compatible)
 const dynamicResponse = {
   success: true,
   agent: finalConfig.agent_type || detectedType,
@@ -136,7 +136,7 @@ const dynamicResponse = {
     config_url: agentConfig ?
       `https://raw.githubusercontent.com/uptax-dev/n8n-orchestrator/main/prompts/agents/${detectedType}.json` :
       null,
-    code_version: '3.0.0',
+    code_version: '3.1.0',
     code_url: 'https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/code/processors/enhanced-response-formatter.js'
   },
   context_variables: finalConfig.context_variables || {
@@ -153,7 +153,7 @@ const dynamicResponse = {
 };
 
 // Debug logging for development
-console.log('✅ Dynamic Response Generated:', {
+console.log('✅ Dynamic Response Generated v3.1:', {
   webhook_url: webhookUrl,
   detected_type: detectedType,
   agent_config_found: !!agentConfig,
@@ -162,5 +162,5 @@ console.log('✅ Dynamic Response Generated:', {
   execution_id: $execution.id
 });
 
-// Return formatted response
+// Return formatted response (N8N compatible format)
 return [dynamicResponse];
