@@ -1,0 +1,69 @@
+{
+  "name": "TEST-Basic-Structure",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/test-basic",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-test",
+      "name": "Test Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-200, 0],
+      "webhookId": "test-basic-webhook"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/assembly-logic/agents-registry-graph.csv",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "load-csv-test",
+      "name": "Load CSV Test",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $('Test Webhook').item.json.body;\nconst csvData = $('Load CSV Test').item.json.data;\n\nconsole.log('=== TESTE BÁSICO ===');\nconsole.log('Input:', inputData);\nconsole.log('CSV length:', csvData ? csvData.length : 'null');\nconsole.log('CSV primeira linha:', csvData ? csvData.split('\\n')[0] : 'null');\n\nreturn [{\n  json: {\n    test: 'basic-structure',\n    input_received: inputData,\n    csv_loaded: csvData ? true : false,\n    csv_length: csvData ? csvData.length : 0,\n    csv_first_line: csvData ? csvData.split('\\n')[0] : 'none',\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "basic-test",
+      "name": "Basic Test",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond-test",
+      "name": "Respond Test",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [400, 0]
+    }
+  ],
+  "connections": {
+    "Test Webhook": {
+      "main": [[{"node": "Load CSV Test", "type": "main", "index": 0}]]
+    },
+    "Load CSV Test": {
+      "main": [[{"node": "Basic Test", "type": "main", "index": 0}]]
+    },
+    "Basic Test": {
+      "main": [[{"node": "Respond Test", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true
+}

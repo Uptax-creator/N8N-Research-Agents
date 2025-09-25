@@ -1,0 +1,192 @@
+{
+  "name": "uptax-proc-1001-graph-COMPLETE",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/graph-complete",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-node",
+      "name": "Webhook Enhanced",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-400, 0],
+      "webhookId": "graph-complete-webhook"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/assembly-logic/agents-registry-graph.csv",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "load-csv",
+      "name": "Load Graph CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-200, 0]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.prompt_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "load-prompt",
+      "name": "Load Prompt from GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [200, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Graph Processor - Production Version\nconst inputData = $('Webhook Enhanced').item.json.body;\nconst csvData = $('Load Graph CSV').item.json.data;\n\nconsole.log('🚀 Graph Processor - Production Version');\nconsole.log('📥 Input:', inputData);\n\nconst projectId = inputData.project_id;\nconst agentId = inputData.agent_id;\nconst query = inputData.query || 'Default query';\nconst workflowId = 'uptax-proc-1001-dynamic';\n\nif (!projectId || !agentId) {\n  return [{\n    json: {\n      success: false,\n      error: 'Missing project_id or agent_id',\n      received: inputData\n    }\n  }];\n}\n\n// Parse CSV\nconst lines = csvData.split('\\n').filter(line => line.trim());\nlet targetLine = null;\n\nfor (let i = 1; i < lines.length; i++) {\n  const line = lines[i];\n  if (line.includes(workflowId) && line.includes(projectId) && line.includes(agentId)) {\n    targetLine = line;\n    console.log('✅ Agent found in CSV');\n    break;\n  }\n}\n\nif (!targetLine) {\n  return [{\n    json: {\n      success: false,\n      error: `No config found for ${workflowId}/${projectId}/${agentId}`,\n      csv_rows: lines.length - 1\n    }\n  }];\n}\n\n// Extract URLs from the CSV line\n// We know the structure: workflow,project,agent,type,description,mcp_json,prompt_url,processor_url,tools_url\nconst promptUrlMatch = targetLine.match(/https:\\/\\/raw\\.githubusercontent\\.com[^,]+enhanced_research_brazilian_proactive\\.txt/);\nconst mcpUrlMatch = targetLine.match(/https:\\/\\/mcp\\.brightdata\\.com\\/sse\\?token=[a-f0-9]+/);\n\nconst agentConfig = {\n  workflow_id: workflowId,\n  project_id: projectId,\n  agent_id: agentId,\n  agent_type: 'enhanced_research',\n  description: 'Brazilian research agent with proactive tools',\n  prompt_url: promptUrlMatch ? promptUrlMatch[0] : 'https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/prompts/agents/enhanced_research_brazilian_proactive.txt',\n  mcp_endpoint: mcpUrlMatch ? mcpUrlMatch[0] : 'https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf'\n};\n\nconsole.log('✅ Config ready:', agentConfig.agent_type);\nconsole.log('📄 Prompt URL:', agentConfig.prompt_url);\nconsole.log('🔌 MCP URL:', agentConfig.mcp_endpoint);\n\nconst sessionId = `${projectId}_${agentId}_${Date.now()}`;\n\nreturn [{\n  json: {\n    text: query,\n    session_id: sessionId,\n    agent_config: agentConfig,\n    prompt_url: agentConfig.prompt_url,\n    mcp_endpoint: agentConfig.mcp_endpoint,\n    processing_metadata: {\n      workflow: workflowId,\n      timestamp: new Date().toISOString(),\n      version: 'production-1.0'\n    }\n  }\n}];"
+      },
+      "id": "graph-processor",
+      "name": "Graph Processor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare data for AI Agent\nconst processorData = $('Graph Processor').item.json;\nconst promptData = $('Load Prompt from GitHub').item.json.data;\n\nconsole.log('🎯 Preparing for AI Agent');\nconsole.log('📄 Prompt loaded:', promptData ? promptData.length : 0, 'chars');\n\nreturn [{\n  json: {\n    text: processorData.text,\n    session_id: processorData.session_id,\n    system_message: promptData || `You are ${processorData.agent_config.description}. Use your tools proactively to provide comprehensive results.`,\n    agent_config: processorData.agent_config,\n    mcp_endpoint: processorData.mcp_endpoint,\n    prompt_loaded: promptData ? true : false,\n    prompt_length: promptData ? promptData.length : 0\n  }\n}];"
+      },
+      "id": "prepare-agent",
+      "name": "Prepare for AI Agent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 0]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "={{ $json.system_message }}"
+        }
+      },
+      "id": "ai-agent",
+      "name": "Enhanced AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [600, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Response Formatter\nconst aiResponse = $('Enhanced AI Agent').item.json;\nconst processorData = $('Prepare for AI Agent').item.json;\n\nconst result = {\n  success: true,\n  agent: processorData.agent_config?.agent_type || 'unknown',\n  project_id: processorData.agent_config?.project_id || 'unknown',\n  agent_id: processorData.agent_config?.agent_id || 'unknown',\n  query: processorData.text || 'No query',\n  result: aiResponse?.output || aiResponse?.text || 'No response generated',\n  metadata: {\n    session_id: processorData.session_id,\n    prompt_loaded: processorData.prompt_loaded,\n    prompt_length: processorData.prompt_length,\n    mcp_used: 'bright_data',\n    timestamp: new Date().toISOString(),\n    workflow: 'uptax-proc-1001-graph-complete',\n    version: '1.0.0'\n  }\n};\n\nconsole.log('✅ Response formatted');\n\nreturn [{ json: result }];"
+      },
+      "id": "formatter",
+      "name": "Response Formatter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [1000, 0]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "topP": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [600, 200],
+      "id": "gemini",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "fo1wxthXWXgY03J3",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.session_id }}"
+      },
+      "id": "memory",
+      "name": "Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "={{ $json.mcp_endpoint }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "mcp-client",
+      "name": "Bright Data MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "position": [600, 400],
+      "typeVersion": 1.1
+    }
+  ],
+  "connections": {
+    "Webhook Enhanced": {
+      "main": [[{"node": "Load Graph CSV", "type": "main", "index": 0}]]
+    },
+    "Load Graph CSV": {
+      "main": [[{"node": "Graph Processor", "type": "main", "index": 0}]]
+    },
+    "Graph Processor": {
+      "main": [[{"node": "Load Prompt from GitHub", "type": "main", "index": 0}]]
+    },
+    "Load Prompt from GitHub": {
+      "main": [[{"node": "Prepare for AI Agent", "type": "main", "index": 0}]]
+    },
+    "Prepare for AI Agent": {
+      "main": [[{"node": "Enhanced AI Agent", "type": "main", "index": 0}]]
+    },
+    "Enhanced AI Agent": {
+      "main": [[{"node": "Response Formatter", "type": "main", "index": 0}]]
+    },
+    "Response Formatter": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [[{"node": "Enhanced AI Agent", "type": "ai_languageModel", "index": 0}]]
+    },
+    "Buffer Memory": {
+      "ai_memory": [[{"node": "Enhanced AI Agent", "type": "ai_memory", "index": 0}]]
+    },
+    "Bright Data MCP": {
+      "ai_tool": [[{"node": "Enhanced AI Agent", "type": "ai_tool", "index": 0}]]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

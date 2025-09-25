@@ -1,0 +1,76 @@
+{
+  "name": "uptax-proc-1001-graph-TEST-BASIC-v2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/test-basic-v3",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-node",
+      "name": "Webhook Enhanced",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-288, -48],
+      "webhookId": "test-basic-webhook-v3"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/assembly-logic/agents-registry-graph.csv",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "load-csv",
+      "name": "Load Graph CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-80, -48]
+    },
+    {
+      "parameters": {
+        "jsCode": "// TESTE BÁSICO v3 - Sem fetch, só estrutura\nconst inputData = $('Webhook Enhanced').item.json.body;\nconst csvData = $('Load Graph CSV').item.json.data;\n\nconsole.log('🚀 TESTE BÁSICO v3 - Estrutura Principal');\n\nconst projectId = inputData.project_id;\nconst agentId = inputData.agent_id;\nconst query = inputData.query || 'Default query';\nconst workflowId = 'uptax-proc-1001-dynamic';\n\n// Parse CSV lines\nconst lines = csvData.split('\\n').filter(line => line.trim());\nconsole.log('📋 CSV lines:', lines.length);\n\n// Find agent - usando regex para pegar linha correta\nlet targetLine = null;\nfor (let i = 1; i < lines.length; i++) {\n  const line = lines[i];\n  if (line.includes(workflowId) && line.includes(projectId) && line.includes(agentId)) {\n    targetLine = line;\n    console.log('✅ Target line found:', line.substring(0, 150) + '...');\n    break;\n  }\n}\n\nif (!targetLine) {\n  return [{\n    json: {\n      success: false,\n      error: 'Agent não encontrado',\n      search: { workflowId, projectId, agentId },\n      available_lines: lines.map((line, i) => `${i}: ${line.substring(0, 100)}`)\n    }\n  }];\n}\n\n// Parse apenas os campos que conseguimos extrair com segurança\n// Vai buscar os primeiros campos fixos antes do JSON complexo\nconst simpleMatch = targetLine.match(/^([^,]+),([^,]+),([^,]+),([^,]+),([^\"]+)/);\n\nconst agentConfig = {\n  workflow_id: workflowId,\n  project_id: projectId, \n  agent_id: agentId,\n  agent_type: simpleMatch ? simpleMatch[4] : 'unknown',\n  description: simpleMatch ? simpleMatch[5] : 'Brazilian research agent',\n  \n  // URLs fixas para teste (conhecemos os valores)\n  prompt_url: 'https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/prompts/agents/enhanced_research_brazilian_proactive.txt',\n  mcp_endpoint: 'https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf',\n  \n  // Debug info\n  raw_line: targetLine,\n  parsing_method: 'fixed_urls_for_testing'\n};\n\nconsole.log('✅ Agent config criado:', agentConfig.agent_type);\n\nconst sessionId = `${projectId}_${agentId}_${Date.now()}`;\n\nreturn [{\n  json: {\n    success: true,\n    test_step: 'structure_validated',\n    input: { project_id: projectId, agent_id: agentId, query: query },\n    csv_test: {\n      loaded: true,\n      lines: lines.length - 1,\n      agent_found: true,\n      parsing_method: 'regex_match'\n    },\n    agent_config: agentConfig,\n    next_steps: [\n      'Add AI Agent node',\n      'Test with Bright Data MCP', \n      'Load prompt from GitHub in AI Agent'\n    ],\n    session_id: sessionId,\n    timestamp: new Date().toISOString(),\n    version: 'test-basic-v3-structure-only'\n  }\n}];"
+      },
+      "id": "graph-processor",
+      "name": "Graph Processor v3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [112, -48]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond Test",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [320, -48]
+    }
+  ],
+  "connections": {
+    "Webhook Enhanced": {
+      "main": [[{"node": "Load Graph CSV", "type": "main", "index": 0}]]
+    },
+    "Load Graph CSV": {
+      "main": [[{"node": "Graph Processor v3", "type": "main", "index": 0}]]
+    },
+    "Graph Processor v3": {
+      "main": [[{"node": "Respond Test", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

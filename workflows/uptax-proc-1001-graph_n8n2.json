@@ -1,0 +1,347 @@
+{
+  "name": "uptax-proc-1001-graph",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "work-1001",
+        "options": {}
+      },
+      "id": "efe8f218-ef31-4665-8f02-9136a8c60953",
+      "name": "Webhook Graph Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        544
+      ],
+      "webhookId": "b91a7af5-03bb-4eff-949b-1e3e0c35b8b0"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Graph CSV Parser - Find project_id + agent_id combination\nconst projectId = $input.all()[0].json.project_id;\nconst agentId = $input.all()[0].json.agent_id;\nconst query = $input.all()[0].json.query;\n\nif (!projectId || !agentId) {\n  return [{\n    json: {\n      error_occurred: true,\n      message: \"Missing required parameters: project_id and agent_id\",\n      graph_key: \"invalid\"\n    }\n  }];\n}\n\n// Generate graph key\nconst graphKey = `${projectId}_${agentId}_${Date.now()}`;\n\nreturn [{\n  json: {\n    project_id: projectId,\n    agent_id: agentId,\n    query: query,\n    graph_key: graphKey,\n    csv_url: \"https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/main/assembly-logic/agents-registry-graph.csv\"\n  }\n}];"
+      },
+      "id": "8d621394-52a2-4c76-a4bd-f6564d2b55f6",
+      "name": "Graph Params Parser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.csv_url }}",
+        "options": {}
+      },
+      "id": "7e10beeb-5b81-4dba-a34d-68765cb82927",
+      "name": "Load Graph CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        192,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse CSV and find matching workflow_id + project_id + agent_id\nconst input = $input.all()[0].json;\nconst csvData = input.data;\nconst projectId = input.project_id;\nconst agentId = input.agent_id;\nconst workflowId = 'uptax-proc-1001-dynamic'; // Current workflow\n\n// Parse CSV\nconst lines = csvData.split('\\n').filter(line => line.trim());\nlet agentConfig = null;\n\n// Find matching row (skip header)\nfor (let i = 1; i < lines.length; i++) {\n  const values = lines[i].split(',').map(v => v.trim());\n  if (values[0] === workflowId && values[1] === projectId && values[2] === agentId) {\n    agentConfig = {\n      workflow_id: values[0],\n      project_id: values[1],\n      agent_id: values[2],\n      agent_type: values[3],\n      description: values[4],\n      prompt_url: values[5],\n      processor_url: values[6],\n      mcp_endpoint: values[7],\n      tools_config_url: values[8]\n    };\n    break;\n  }\n}\n\nif (!agentConfig) {\n  return [{\n    json: {\n      error_occurred: true,\n      message: `No configuration found for workflow: ${workflowId}, project_id: ${projectId}, agent_id: ${agentId}`,\n      graph_key: input.graph_key\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    ...input,\n    agent_config: agentConfig,\n    found_match: true\n  }\n}];"
+      },
+      "id": "ebdf1803-e066-4b3d-86f1-376306734eb0",
+      "name": "Graph CSV Parser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.agent_config.tools_config_url }}",
+        "options": {}
+      },
+      "id": "f3625d2b-323e-47fa-8c87-345177318bec",
+      "name": "Load Tools Config",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        624,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare final agent configuration\nconst input = $input.all()[0].json;\nconst toolsConfig = input.data;\n\nlet parsedToolsConfig;\ntry {\n  parsedToolsConfig = JSON.parse(toolsConfig);\n} catch (error) {\n  return [{\n    json: {\n      error_occurred: true,\n      message: `Failed to parse tools configuration: ${error.message}`,\n      graph_key: input.graph_key\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    project_id: input.project_id,\n    agent_id: input.agent_id,\n    query: input.query,\n    graph_key: input.graph_key,\n    agent_config: input.agent_config,\n    tools_config: parsedToolsConfig,\n    mcp_endpoint: input.agent_config.mcp_endpoint,\n    agent_type: input.agent_config.agent_type,\n    ready_for_execution: true\n  }\n}];"
+      },
+      "id": "e448c98f-e721-49b1-96e1-6e13adb16165",
+      "name": "Final Config Preparation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/code/processors/enhanced-response-formatter-clean.js",
+        "options": {
+          "response": {}
+        }
+      },
+      "id": "8f238f49-25f5-4207-a899-ae5cf7176346",
+      "name": "Load Response Formatter1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1376,
+        544
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// ✅ FIXED VERSION - Response Formatter Node\n// Correção para evitar chave reservada 'error' no output\n\n// Dynamic Response Formatter - Loaded from GitHub\ntry {\n  const formatterCode = $('load-response-formatter').item.json.data;\n  const formatter = eval(formatterCode);\n  const aiResponse = $('ai-agent').item.json;\n  const result = formatter.formatResponse(aiResponse, $input.item.json);\n\n  // ✅ Retorna resultado encapsulado corretamente\n  return [{\n    json: {\n      ...result,\n      formatted_at: new Date().toISOString(),\n      status: \"success\"\n    }\n  }];\n\n} catch (error) {\n  console.error('Response formatter error:', error);\n\n  // ✅ CORREÇÃO: Evitar chaves reservadas + estrutura correta\n  return [{\n    json: {\n      success: false,\n      agent: 'enhanced_research',\n      error_occurred: true,           // ❌ era: error: error.message\n      error_message: error.message,   // Renomeado de 'error'\n      error_details: error.stack || error.toString(),\n      timestamp: new Date().toISOString(),\n      status: \"formatter_error\",\n      fallback_data: {\n        ai_response: $('ai-agent').item.json || null,\n        input_data: $input.item.json || null\n      }\n    }\n  }];\n}"
+      },
+      "id": "8f15987a-50eb-46bd-a421-fa3a9dc14b6b",
+      "name": "Response Formatter1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1552,
+        544
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "options": {}
+      },
+      "id": "f9c0bff2-7098-401a-a746-581e1e85ed00",
+      "name": "Respond Enhanced1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        1760,
+        544
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "topP": 0.3
+        }
+      },
+      "id": "e5e20a4c-d415-4896-ba4c-74efca3cb0e0",
+      "name": "Google Gemini Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        944,
+        816
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "fo1wxthXWXgY03J3",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "uptax_research_enhanced_research_session"
+      },
+      "id": "6f418aab-6345-44ef-bbdd-5493505c86c0",
+      "name": "Buffer Memory1",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1104,
+        832
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "endpointUrl": "{{ $json.mcp_endpoint }}",
+        "options": {
+          "timeout": 6000
+        }
+      },
+      "id": "318383e7-b605-421c-9c32-a8eb45f1abb3",
+      "name": "MCP Client1",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "position": [
+        1280,
+        832
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "{{ $json.query }}",
+        "options": {
+          "systemMessage": "{{ $('Load Prompt Content').item.json.data }}"
+        }
+      },
+      "id": "38d80a70-0146-4387-bed8-964ad1b61581",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1056,
+        544
+      ],
+      "typeVersion": 2.2,
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Graph Trigger": {
+      "main": [
+        [
+          {
+            "node": "Graph Params Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Graph Params Parser": {
+      "main": [
+        [
+          {
+            "node": "Load Graph CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Graph CSV": {
+      "main": [
+        [
+          {
+            "node": "Graph CSV Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Graph CSV Parser": {
+      "main": [
+        [
+          {
+            "node": "Load Tools Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Tools Config": {
+      "main": [
+        [
+          {
+            "node": "Final Config Preparation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Config Preparation": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Response Formatter1": {
+      "main": [
+        [
+          {
+            "node": "Response Formatter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response Formatter1": {
+      "main": [
+        [
+          {
+            "node": "Respond Enhanced1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buffer Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Load Response Formatter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "33c314ee-4a8f-467f-98ea-23be60c6d804",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd5e44ae437f0c9ab2d07a5f9f48e7f2a5b6c7d370c2fb3ae41bd86053b66f9d"
+  },
+  "id": "Nc2D2tVEB74PYW40",
+  "tags": []
+}

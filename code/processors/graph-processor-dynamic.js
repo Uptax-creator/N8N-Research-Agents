@@ -8,7 +8,7 @@ async function execute() {
   console.log('🚀 Graph Processor - Dynamic Prompt Loading Starting...');
 
   // Get input data
-  const inputData = $('Webhook Enhanced').item.json.body;
+  const inputData = $('Webhook Enhanced1').item.json.body;
   const csvData = $('Load Graph CSV').item.json.data;
 
   console.log('📥 Input received:', inputData);

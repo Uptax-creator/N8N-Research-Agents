@@ -1,0 +1,53 @@
+{
+  "name": "uptax-proc-1001-debug",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "debug-1001",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// SIMPLE DEBUG PARSER\nconst input = $input.all()[0].json;\n\nconsole.log('INPUT RECEIVED:', JSON.stringify(input));\n\nconst projectId = input.project_id || 'NOT_FOUND';\nconst agentId = input.agent_id || 'NOT_FOUND';\nconst query = input.query || 'NO_QUERY';\n\nreturn [{\n  json: {\n    debug_message: 'Parser executed successfully',\n    received_project_id: projectId,\n    received_agent_id: agentId,\n    received_query: query,\n    timestamp: new Date().toISOString(),\n    full_input: input\n  }\n}];"
+      },
+      "id": "parser-node",
+      "name": "Debug Parser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "options": {}
+      },
+      "id": "response-node",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [650, 300],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Debug Parser", "type": "main", "index": 0}]]
+    },
+    "Debug Parser": {
+      "main": [[{"node": "Respond", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

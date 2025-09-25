@@ -1,0 +1,76 @@
+{
+  "name": "uptax-proc-1001-graph-TEST-BASIC",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/test-basic-v2",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-node",
+      "name": "Webhook Enhanced",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-288, -48],
+      "webhookId": "test-basic-webhook-v2"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/assembly-logic/agents-registry-graph.csv",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "load-csv",
+      "name": "Load Graph CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-80, -48]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Graph Processor - TESTE BÁSICO\nconst inputData = $('Webhook Enhanced').item.json.body;\nconst csvData = $('Load Graph CSV').item.json.data;\n\nconsole.log('🚀 TESTE BÁSICO - Graph Processor');\nconsole.log('📥 Input received:', inputData);\nconsole.log('📄 CSV loaded:', csvData ? 'YES' : 'NO', csvData ? csvData.length : 0, 'chars');\n\nif (!csvData) {\n  return [{\n    json: {\n      success: false,\n      error: 'CSV not loaded',\n      test_step: 'csv_loading',\n      timestamp: new Date().toISOString()\n    }\n  }];\n}\n\nconst projectId = inputData.project_id;\nconst agentId = inputData.agent_id;\nconst query = inputData.query || 'Default query';\nconst workflowId = 'uptax-proc-1001-dynamic';\n\nif (!projectId || !agentId) {\n  return [{\n    json: {\n      success: false,\n      error: 'Missing project_id or agent_id',\n      received: inputData,\n      test_step: 'input_validation',\n      timestamp: new Date().toISOString()\n    }\n  }];\n}\n\n// Parse CSV - FIXED VERSION for multi-MCP\nconsole.log('📊 Parsing CSV data...');\nconst lines = csvData.split('\\n').filter(line => line.trim());\nconsole.log('📋 CSV lines found:', lines.length);\n\nlet agentConfig = null;\n\nfor (let i = 1; i < lines.length; i++) {\n  const line = lines[i];\n  console.log(`🔍 Processing line ${i}:`, line.substring(0, 100) + '...');\n  \n  // Split preserving JSON content - find positions of key commas\n  const parts = [];\n  let current = '';\n  let inQuotes = false;\n  let inBrackets = 0;\n  \n  for (let j = 0; j < line.length; j++) {\n    const char = line[j];\n    if (char === '\"') inQuotes = !inQuotes;\n    if (!inQuotes && char === '[') inBrackets++;\n    if (!inQuotes && char === ']') inBrackets--;\n    \n    if (!inQuotes && inBrackets === 0 && char === ',') {\n      parts.push(current.trim());\n      current = '';\n    } else {\n      current += char;\n    }\n  }\n  if (current) parts.push(current.trim());\n  \n  console.log(`🔍 Checking parsed:`, parts[0], parts[1], parts[2]);\n  \n  if (parts[0] === workflowId && parts[1] === projectId && parts[2] === agentId) {\n    console.log('✅ Match found!');\n    agentConfig = {\n      workflow_id: parts[0],\n      project_id: parts[1],\n      agent_id: parts[2],\n      agent_type: parts[3],\n      description: parts[4],\n      mcp_endpoints_raw: parts[5], // Keep raw for debugging\n      prompt_url: parts[6],\n      processor_url: parts[7],\n      tools_config_url: parts[8]\n    };\n    break;\n  }\n}\n\nif (!agentConfig) {\n  return [{\n    json: {\n      success: false,\n      error: `No config found for ${workflowId}/${projectId}/${agentId}`,\n      csv_rows: lines.length - 1,\n      test_step: 'agent_lookup',\n      search_criteria: { workflowId, projectId, agentId },\n      timestamp: new Date().toISOString()\n    }\n  }];\n}\n\nconsole.log('✅ Agent config found:', agentConfig.agent_type);\n\n// TESTE: Tentar carregar prompt do GitHub usando N8N $http\nlet promptTest = {\n  url: agentConfig.prompt_url,\n  loaded: false,\n  length: 0,\n  error: null\n};\n\ntry {\n  console.log('🌐 Testing prompt loading from:', agentConfig.prompt_url);\n  \n  // Use N8N's built-in $http instead of fetch\n  const response = await $http.get(agentConfig.prompt_url, {\n    headers: {\n      'User-Agent': 'N8N-Graph-Processor/1.0'\n    },\n    timeout: 10000\n  });\n  \n  if (response && response.data) {\n    const promptContent = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);\n    promptTest.loaded = true;\n    promptTest.length = promptContent.length;\n    console.log('✅ Prompt loaded successfully with $http:', promptTest.length, 'chars');\n  } else {\n    promptTest.error = 'No data in response';\n    console.log('❌ No data in response');\n  }\n} catch (error) {\n  promptTest.error = error.message || 'Unknown error';\n  console.log('❌ Prompt load error:', promptTest.error);\n  \n  // Fallback: skip prompt loading for now\n  promptTest.url = agentConfig.prompt_url;\n  promptTest.loaded = false;\n  promptTest.error = 'Will be loaded in AI Agent step';\n}\n\nconst sessionId = `${projectId}_${agentId}_${Date.now()}`;\n\nconsole.log('🎯 TESTE BÁSICO CONCLUÍDO');\n\nreturn [{\n  json: {\n    success: true,\n    test_step: 'complete',\n    input: {\n      project_id: projectId,\n      agent_id: agentId,\n      query: query\n    },\n    csv_test: {\n      loaded: true,\n      lines: lines.length - 1,\n      agent_found: true\n    },\n    agent_config: agentConfig,\n    prompt_test: promptTest,\n    session_id: sessionId,\n    timestamp: new Date().toISOString(),\n    version: 'test-basic-1.0'\n  }\n}];"
+      },
+      "id": "graph-processor",
+      "name": "Graph Processor TEST",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [112, -48]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond Test",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [320, -48]
+    }
+  ],
+  "connections": {
+    "Webhook Enhanced": {
+      "main": [[{"node": "Load Graph CSV", "type": "main", "index": 0}]]
+    },
+    "Load Graph CSV": {
+      "main": [[{"node": "Graph Processor TEST", "type": "main", "index": 0}]]
+    },
+    "Graph Processor TEST": {
+      "main": [[{"node": "Respond Test", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

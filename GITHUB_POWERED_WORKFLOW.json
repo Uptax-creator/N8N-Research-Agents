@@ -1,0 +1,75 @@
+{
+  "name": "uptax-proc-1001-github",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "github-1001",
+        "responseMode": "responseNode",
+        "options": {"allowedOrigins": "*"}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/code/nodes/graph-params-parser.js",
+        "options": {}
+      },
+      "id": "load-parser-code",
+      "name": "Load Parser Code",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Execute GitHub-hosted code\nconst input = $input.all()[0].json;\nconst codeFromGithub = input.data;\n\n// Execute the code with input data\nconst result = eval(codeFromGithub);\n\nreturn result;"
+      },
+      "id": "execute-parser",
+      "name": "Execute Parser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// SIMPLE SUCCESS RESPONSE - NO MORE COMPLEX NODES!\nconst input = $input.all()[0].json;\n\nreturn [{\n  json: {\n    success: true,\n    message: 'GitHub-powered workflow executed successfully!',\n    data: input,\n    timestamp: new Date().toISOString(),\n    version: '2.0.0',\n    architecture: 'github_first'\n  }\n}];"
+      },
+      "id": "simple-response",
+      "name": "Simple Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [1000, 300],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Load Parser Code", "type": "main", "index": 0}]]
+    },
+    "Load Parser Code": {
+      "main": [[{"node": "Execute Parser", "type": "main", "index": 0}]]
+    },
+    "Execute Parser": {
+      "main": [[{"node": "Simple Response", "type": "main", "index": 0}]]
+    },
+    "Simple Response": {
+      "main": [[{"node": "Respond", "type": "main", "index": 0}]]
+    }
+  },
+  "active": true
+}
