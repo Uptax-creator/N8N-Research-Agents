@@ -1,0 +1,45 @@
+{
+  "manifest_version": "1.0.0",
+  "updated_at": "2025-09-25T03:45:00Z",
+  "deployment_strategy": "github_first",
+
+  "nodes": {
+    "graph_params_parser": {
+      "version": "1.0.0",
+      "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/code/nodes/graph-params-parser.js",
+      "description": "Extract and validate project_id/agent_id parameters",
+      "changes": "Initial version with multi-source parameter extraction"
+    },
+    "csv_parser_with_merge": {
+      "version": "1.0.0",
+      "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/code/nodes/csv-parser-with-merge.js",
+      "description": "Parse CSV while preserving all input data",
+      "changes": "Merge strategy to prevent data loss between nodes"
+    },
+    "config_preparation": {
+      "version": "1.0.0",
+      "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/code/nodes/config-preparation.js",
+      "description": "Prepare final agent configuration",
+      "status": "pending"
+    }
+  },
+
+  "workflows": {
+    "uptax-proc-1001-dynamic": {
+      "version": "2.0.0",
+      "description": "Graph-based multi-agent system with GitHub-hosted code",
+      "nodes_used": ["graph_params_parser", "csv_parser_with_merge", "config_preparation"],
+      "deployment_url": "https://primary-production-56785.up.railway.app/webhook/work-1001"
+    }
+  },
+
+  "next_deployment": {
+    "strategy": "Simply update this manifest.json file and all N8N workflows auto-update!",
+    "benefits": [
+      "Zero-downtime updates",
+      "Version rollback capability",
+      "A/B testing support",
+      "Multi-tenant deployments"
+    ]
+  }
+}
