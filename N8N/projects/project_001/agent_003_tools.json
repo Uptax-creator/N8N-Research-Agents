@@ -1,0 +1,80 @@
+{
+  "tools_config": {
+    "version": "project_001-v1.0",
+    "project_id": "project_001",
+    "agent_id": "agent_003",
+    "agent_type": "gdocs_documentation",
+    "description": "Google Docs documentation tools for Brazilian compliance - project_001",
+
+    "langchain_tools": [
+      {
+        "name": "brazilian_compliance_docs",
+        "type": "mcp_client",
+        "description": "Google Docs creation for Brazilian compliance documentation",
+        "endpoint": "https://apollo-3irns8zl6-composio.vercel.app/v3/mcp/aab98bef-8816-4873-95f6-45615ca063d4/mcp?include_composio_helper_actions=true",
+        "transport": "http",
+        "enabled": true,
+        "priority": 1,
+        "project_specific": true,
+        "parameters": {
+          "content": {
+            "type": "string",
+            "description": "Brazilian compliance content to document",
+            "required": true
+          },
+          "document_type": {
+            "type": "string",
+            "description": "Type: compliance_report, tax_analysis, regulatory_update, procedure_manual",
+            "default": "compliance_report"
+          },
+          "template": {
+            "type": "string",
+            "description": "Brazilian template: icms_compliance, iss_procedure, pis_cofins_analysis",
+            "default": "icms_compliance"
+          }
+        }
+      }
+    ],
+
+    "simple_memory": {
+      "enabled": true,
+      "type": "buffer_window",
+      "max_entries": 25,
+      "ttl_minutes": 120,
+      "key_prefix": "project_001_agent_003_gdocs_memory",
+      "project_isolation": true
+    },
+
+    "mcp_integrations": {
+      "uptax_gdocs": {
+        "enabled": true,
+        "endpoint": "https://apollo-3irns8zl6-composio.vercel.app/v3/mcp/aab98bef-8816-4873-95f6-45615ca063d4/mcp?include_composio_helper_actions=true",
+        "transport": "http",
+        "use_for": ["compliance_documentation", "structured_reports", "regulatory_procedures"],
+        "specialization": "brazilian_compliance_docs",
+        "project_specific_config": {
+          "templates": ["ICMS_Compliance_Report", "ISS_Procedure_Manual", "PIS_COFINS_Analysis"],
+          "language": "pt-BR",
+          "compliance_focus": "Brazilian tax regulations",
+          "document_standards": "ABNT"
+        }
+      }
+    },
+
+    "project_context": {
+      "project_id": "project_001",
+      "project_name": "Brazilian Tax Compliance Research",
+      "document_purpose": "Tax compliance documentation",
+      "target_audience": "Brazilian tax professionals",
+      "regulatory_standards": ["ABNT", "CFC", "CRC"],
+      "document_types": ["reports", "procedures", "analysis", "compliance_checklists"]
+    },
+
+    "dynamic_loading": {
+      "enabled": true,
+      "github_backed": true,
+      "project_customizable": true,
+      "version": "project_001-v1.0"
+    }
+  }
+}
