@@ -38,15 +38,39 @@ async function execute() {
   for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(',').map(v => v.trim());
     if (values[0] === workflowId && values[1] === projectId && values[2] === agentId) {
+      // Parse MCP endpoints - support both single URL and JSON array
+      let mcpEndpoints;
+      const mcpField = values[5]; // mcp_endpoints field
+
+      try {
+        // Try to parse as JSON array (new format)
+        if (mcpField.startsWith('[') && mcpField.endsWith(']')) {
+          mcpEndpoints = JSON.parse(mcpField.replace(/""/g, '"'));
+          console.log('✅ Parsed multiple MCP endpoints:', mcpEndpoints.length);
+        } else {
+          // Fallback to single URL (legacy format)
+          mcpEndpoints = [{
+            name: "legacy_mcp",
+            url: mcpField,
+            type: "unknown",
+            priority: 1
+          }];
+          console.log('⚠️ Using legacy single MCP endpoint');
+        }
+      } catch (error) {
+        console.log('❌ Error parsing MCP endpoints:', error.message);
+        mcpEndpoints = [];
+      }
+
       agentConfig = {
         workflow_id: values[0],
         project_id: values[1],
         agent_id: values[2],
         agent_type: values[3],
         description: values[4],
-        prompt_url: values[5],
-        processor_url: values[6],
-        mcp_endpoint: values[7],
+        mcp_endpoints: mcpEndpoints,
+        prompt_url: values[6],
+        processor_url: values[7],
         tools_config_url: values[8]
       };
       break;
@@ -99,7 +123,7 @@ Always be thorough, professional, and results-oriented.`;
 
   console.log('🎯 Processing completed successfully');
   console.log('📋 Session ID:', sessionId);
-  console.log('🔧 MCP Endpoint:', agentConfig.mcp_endpoint);
+  console.log('🔧 MCP Endpoints:', agentConfig.mcp_endpoints.map(mcp => `${mcp.name}(${mcp.type})`).join(', '));
 
   // Return data for LangChain AI Agent
   return [{
@@ -112,8 +136,10 @@ Always be thorough, professional, and results-oriented.`;
       processing_metadata: {
         prompt_source: agentConfig.prompt_url,
         prompt_length: systemMessage.length,
+        mcp_count: agentConfig.mcp_endpoints.length,
+        mcp_types: agentConfig.mcp_endpoints.map(mcp => mcp.type),
         timestamp: new Date().toISOString(),
-        version: '1.0.0'
+        version: '2.0.0'
       }
     }
   }];
