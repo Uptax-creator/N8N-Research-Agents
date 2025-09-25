@@ -1,0 +1,80 @@
+{
+  "tools_config": {
+    "version": "project_002-v1.0",
+    "project_id": "project_002",
+    "agent_id": "agent_001",
+    "agent_type": "enhanced_research",
+    "description": "Global market research tools for project_002",
+
+    "langchain_tools": [
+      {
+        "name": "global_market_search",
+        "type": "external_api",
+        "description": "Global market research and analysis using Perplexity API",
+        "endpoint": "https://api.perplexity.ai/chat/completions",
+        "transport": "http",
+        "enabled": true,
+        "priority": 1,
+        "project_specific": true,
+        "parameters": {
+          "query": {
+            "type": "string",
+            "description": "Global market research query",
+            "required": true
+          },
+          "market_focus": {
+            "type": "string",
+            "description": "Market focus: global, US, EU, APAC, emerging",
+            "default": "global"
+          },
+          "industry": {
+            "type": "string",
+            "description": "Industry: tech, finance, healthcare, energy, consumer",
+            "default": "tech"
+          }
+        }
+      }
+    ],
+
+    "simple_memory": {
+      "enabled": true,
+      "type": "buffer_window",
+      "max_entries": 12,
+      "ttl_minutes": 30,
+      "key_prefix": "project_002_agent_001_memory",
+      "project_isolation": true
+    },
+
+    "mcp_integrations": {
+      "perplexity": {
+        "enabled": true,
+        "endpoint": "https://api.perplexity.ai/chat/completions",
+        "transport": "http",
+        "use_for": ["global_market_research", "trend_analysis", "competitive_intelligence"],
+        "specialization": "global_market_focus",
+        "project_specific_config": {
+          "target_sources": ["bloomberg.com", "reuters.com", "wsj.com", "ft.com"],
+          "language": "en-US",
+          "currency": "USD",
+          "market_scope": "global"
+        }
+      }
+    },
+
+    "project_context": {
+      "project_id": "project_002",
+      "project_name": "Global Market Analysis",
+      "target_market": "Global",
+      "primary_language": "English",
+      "regulatory_focus": "International markets",
+      "data_sources": ["financial_news", "market_data", "analyst_reports", "government_stats"]
+    },
+
+    "dynamic_loading": {
+      "enabled": true,
+      "github_backed": true,
+      "project_customizable": true,
+      "version": "project_002-v1.0"
+    }
+  }
+}

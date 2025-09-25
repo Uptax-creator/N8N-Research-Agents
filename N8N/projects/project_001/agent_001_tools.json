@@ -1,0 +1,80 @@
+{
+  "tools_config": {
+    "version": "project_001-v1.0",
+    "project_id": "project_001",
+    "agent_id": "agent_001",
+    "agent_type": "enhanced_research",
+    "description": "Brazilian market research tools for project_001",
+
+    "langchain_tools": [
+      {
+        "name": "brazilian_market_search",
+        "type": "mcp_client",
+        "description": "Brazilian market research and analysis using Bright Data",
+        "endpoint": "https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf",
+        "transport": "sse",
+        "enabled": true,
+        "priority": 1,
+        "project_specific": true,
+        "parameters": {
+          "query": {
+            "type": "string",
+            "description": "Brazilian market research query",
+            "required": true
+          },
+          "market_focus": {
+            "type": "string",
+            "description": "Market focus: brazil, latam, south_america",
+            "default": "brazil"
+          },
+          "language": {
+            "type": "string",
+            "description": "Response language: pt-BR, en-US",
+            "default": "pt-BR"
+          }
+        }
+      }
+    ],
+
+    "simple_memory": {
+      "enabled": true,
+      "type": "buffer_window",
+      "max_entries": 15,
+      "ttl_minutes": 45,
+      "key_prefix": "project_001_agent_001_memory",
+      "project_isolation": true
+    },
+
+    "mcp_integrations": {
+      "bright_data": {
+        "enabled": true,
+        "endpoint": "https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf",
+        "transport": "sse",
+        "use_for": ["market_research", "trend_analysis", "competitor_analysis"],
+        "specialization": "brazilian_market_focus",
+        "project_specific_config": {
+          "target_sources": ["exame.com", "valor.com.br", "estadao.com.br", "g1.globo.com"],
+          "language": "pt-BR",
+          "currency": "BRL",
+          "market_scope": "brazilian"
+        }
+      }
+    },
+
+    "project_context": {
+      "project_id": "project_001",
+      "project_name": "Brazilian Tax Compliance Research",
+      "target_market": "Brazil",
+      "primary_language": "Portuguese (pt-BR)",
+      "regulatory_focus": "Brazilian tax compliance",
+      "data_sources": ["government_official", "financial_news", "market_data", "regulatory_updates"]
+    },
+
+    "dynamic_loading": {
+      "enabled": true,
+      "github_backed": true,
+      "project_customizable": true,
+      "version": "project_001-v1.0"
+    }
+  }
+}

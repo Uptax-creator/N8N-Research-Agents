@@ -1,0 +1,79 @@
+{
+  "tools_config": {
+    "version": "project_001-v1.0",
+    "project_id": "project_001",
+    "agent_id": "agent_002",
+    "agent_type": "fiscal_research",
+    "description": "Brazilian fiscal research tools for project_001",
+
+    "langchain_tools": [
+      {
+        "name": "brazilian_fiscal_search",
+        "type": "mcp_client",
+        "description": "Brazilian fiscal and tax law research using Bright Data",
+        "endpoint": "https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf",
+        "transport": "sse",
+        "enabled": true,
+        "priority": 1,
+        "project_specific": true,
+        "parameters": {
+          "query": {
+            "type": "string",
+            "description": "Brazilian tax law or fiscal regulation query",
+            "required": true
+          },
+          "tax_type": {
+            "type": "string",
+            "description": "Tax type: icms, iss, pis_cofins, irpj, csll, simples",
+            "default": "icms"
+          },
+          "jurisdiction": {
+            "type": "string",
+            "description": "Jurisdiction: federal, estadual, municipal",
+            "default": "federal"
+          }
+        }
+      }
+    ],
+
+    "simple_memory": {
+      "enabled": true,
+      "type": "buffer_window",
+      "max_entries": 20,
+      "ttl_minutes": 60,
+      "key_prefix": "project_001_agent_002_fiscal_memory",
+      "project_isolation": true
+    },
+
+    "mcp_integrations": {
+      "bright_data": {
+        "enabled": true,
+        "endpoint": "https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf",
+        "transport": "sse",
+        "use_for": ["fiscal_research", "tax_law", "compliance_search"],
+        "specialization": "brazilian_tax_law",
+        "project_specific_config": {
+          "target_sources": ["receita.fazenda.gov.br", "confaz.fazenda.gov.br", "planalto.gov.br"],
+          "language": "pt-BR",
+          "legal_focus": true,
+          "official_sources_only": true
+        }
+      }
+    },
+
+    "project_context": {
+      "project_id": "project_001",
+      "project_name": "Brazilian Tax Compliance Research",
+      "regulatory_focus": "Brazilian tax compliance",
+      "primary_sources": ["official_government", "legal_databases", "fiscal_authorities"],
+      "compliance_areas": ["ICMS", "ISS", "PIS/COFINS", "IRPJ", "CSLL", "Simples Nacional"]
+    },
+
+    "dynamic_loading": {
+      "enabled": true,
+      "github_backed": true,
+      "project_customizable": true,
+      "version": "project_001-v1.0"
+    }
+  }
+}

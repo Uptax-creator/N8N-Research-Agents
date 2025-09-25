@@ -1,0 +1,108 @@
+{
+  "name": "uptax-proc-1001-graph",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "uptax-proc-1001-dynamic",
+        "options": {}
+      },
+      "id": "f8a1234a-1234-1234-1234-123456789001",
+      "name": "Webhook Graph Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Graph CSV Parser - Find project_id + agent_id combination\nconst projectId = $input.all()[0].json.project_id;\nconst agentId = $input.all()[0].json.agent_id;\nconst query = $input.all()[0].json.query;\n\nif (!projectId || !agentId) {\n  return [{\n    json: {\n      error_occurred: true,\n      message: \"Missing required parameters: project_id and agent_id\",\n      graph_key: \"invalid\"\n    }\n  }];\n}\n\n// Generate graph key\nconst graphKey = `${projectId}_${agentId}_${Date.now()}`;\n\nreturn [{\n  json: {\n    project_id: projectId,\n    agent_id: agentId,\n    query: query,\n    graph_key: graphKey,\n    csv_url: \"https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/main/assembly-logic/agents-registry-graph.csv\"\n  }\n}];"
+      },
+      "id": "f8a1234a-1234-1234-1234-123456789002",
+      "name": "Graph Params Parser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.csv_url }}",
+        "options": {}
+      },
+      "id": "f8a1234a-1234-1234-1234-123456789003",
+      "name": "Load Graph CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse CSV and find matching project_id + agent_id\nconst input = $input.all()[0].json;\nconst csvData = input.data;\nconst projectId = input.project_id;\nconst agentId = input.agent_id;\n\n// Parse CSV\nconst lines = csvData.split('\\n').filter(line => line.trim());\nlet agentConfig = null;\n\n// Find matching row (skip header)\nfor (let i = 1; i < lines.length; i++) {\n  const values = lines[i].split(',').map(v => v.trim());\n  if (values[0] === projectId && values[1] === agentId) {\n    agentConfig = {\n      project_id: values[0],\n      agent_id: values[1],\n      agent_type: values[2],\n      description: values[3],\n      prompt_url: values[4],\n      processor_url: values[5],\n      mcp_endpoint: values[6],\n      tools_config_url: values[7]\n    };\n    break;\n  }\n}\n\nif (!agentConfig) {\n  return [{\n    json: {\n      error_occurred: true,\n      message: `No configuration found for project_id: ${projectId}, agent_id: ${agentId}`,\n      graph_key: input.graph_key\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    ...input,\n    agent_config: agentConfig,\n    found_match: true\n  }\n}];"
+      },
+      "id": "f8a1234a-1234-1234-1234-123456789004",
+      "name": "Graph CSV Parser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.agent_config.tools_config_url }}",
+        "options": {}
+      },
+      "id": "f8a1234a-1234-1234-1234-123456789005",
+      "name": "Load Tools Config",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare final agent configuration\nconst input = $input.all()[0].json;\nconst toolsConfig = input.data;\n\nlet parsedToolsConfig;\ntry {\n  parsedToolsConfig = JSON.parse(toolsConfig);\n} catch (error) {\n  return [{\n    json: {\n      error_occurred: true,\n      message: `Failed to parse tools configuration: ${error.message}`,\n      graph_key: input.graph_key\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    project_id: input.project_id,\n    agent_id: input.agent_id,\n    query: input.query,\n    graph_key: input.graph_key,\n    agent_config: input.agent_config,\n    tools_config: parsedToolsConfig,\n    mcp_endpoint: input.agent_config.mcp_endpoint,\n    agent_type: input.agent_config.agent_type,\n    ready_for_execution: true\n  }\n}];"
+      },
+      "id": "f8a1234a-1234-1234-1234-123456789006",
+      "name": "Final Config Preparation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mock LangChain Agent Response (replace with actual LangChain Agent node)\nconst input = $input.all()[0].json;\n\nconst mockResponse = {\n  success: true,\n  graph_key: input.graph_key,\n  project_id: input.project_id,\n  agent_id: input.agent_id,\n  agent_type: input.agent_type,\n  response: `Mock response from ${input.agent_type} agent for query: ${input.query}`,\n  agent_config: {\n    mcp_type: input.agent_config.agent_type,\n    mcp_endpoint: input.mcp_endpoint\n  },\n  project_context: input.tools_config.tools_config.project_context,\n  timestamp: new Date().toISOString()\n};\n\nreturn [{ json: mockResponse }];"
+      },
+      "id": "f8a1234a-1234-1234-1234-123456789007",
+      "name": "Mock Agent Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Graph Trigger": {
+      "main": [[{"node": "Graph Params Parser", "type": "main", "index": 0}]]
+    },
+    "Graph Params Parser": {
+      "main": [[{"node": "Load Graph CSV", "type": "main", "index": 0}]]
+    },
+    "Load Graph CSV": {
+      "main": [[{"node": "Graph CSV Parser", "type": "main", "index": 0}]]
+    },
+    "Graph CSV Parser": {
+      "main": [[{"node": "Load Tools Config", "type": "main", "index": 0}]]
+    },
+    "Load Tools Config": {
+      "main": [[{"node": "Final Config Preparation", "type": "main", "index": 0}]]
+    },
+    "Final Config Preparation": {
+      "main": [[{"node": "Mock Agent Response", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-09-24T23:11:00.000Z",
+  "versionId": "f8a1234a-1234-1234-1234-123456789000"
+}
