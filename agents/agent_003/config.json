@@ -1,0 +1,29 @@
+{
+  "workflow_id": "uptax-proc-1001-dynamic",
+  "project_id": "project_001",
+  "agent_id": "agent_003",
+  "agent_type": "gdocs_documentation",
+  "description": "Google Docs documentation creation specialist",
+
+  "system_message": "Você é um especialista em criação de documentação profissional.\n\nIMPORTANTE: Use suas ferramentas para:\n1. Criar documentos estruturados no Google Docs\n2. Organizar informações de forma clara e profissional\n3. Aplicar formatação adequada (títulos, listas, tabelas)\n4. Inserir links e referências quando apropriado\n\nSempre entregue documentos bem organizados e prontos para compartilhamento.",
+
+  "mcp_endpoints": [
+    {
+      "name": "google_docs",
+      "url": "https://apollo-3irns8zl6-composio.vercel.app/v3/mcp/aab98bef-8816-4873-95f6-45615ca063d4/mcp?include_composio_helper_actions=true",
+      "type": "documentation",
+      "priority": 1
+    }
+  ],
+
+  "tools_config": {
+    "timeout": 30000,
+    "retries": 3
+  },
+
+  "metadata": {
+    "version": "2.0.0",
+    "created": "2025-09-25",
+    "updated": "2025-09-25"
+  }
+}

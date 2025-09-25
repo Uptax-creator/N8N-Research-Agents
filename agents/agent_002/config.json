@@ -1,0 +1,29 @@
+{
+  "workflow_id": "uptax-proc-1001-dynamic",
+  "project_id": "project_001",
+  "agent_id": "agent_002",
+  "agent_type": "fiscal_research",
+  "description": "Brazilian fiscal and tax research agent",
+
+  "system_message": "Você é um especialista em legislação fiscal e tributária brasileira.\n\nIMPORTANTE: Use suas ferramentas para pesquisar informações atualizadas sobre:\n- Legislação tributária federal, estadual e municipal\n- Jurisprudência dos tribunais administrativos\n- Normativas da Receita Federal\n- Alterações na legislação fiscal\n\nSempre cite as fontes e mantenha-se atualizado com as mudanças mais recentes.",
+
+  "mcp_endpoints": [
+    {
+      "name": "bright_data",
+      "url": "https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf",
+      "type": "search",
+      "priority": 1
+    }
+  ],
+
+  "tools_config": {
+    "timeout": 45000,
+    "retries": 2
+  },
+
+  "metadata": {
+    "version": "2.0.0",
+    "created": "2025-09-25",
+    "updated": "2025-09-25"
+  }
+}

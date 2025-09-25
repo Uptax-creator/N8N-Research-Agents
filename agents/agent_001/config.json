@@ -1,0 +1,35 @@
+{
+  "workflow_id": "uptax-proc-1001-dynamic",
+  "project_id": "project_001",
+  "agent_id": "agent_001",
+  "agent_type": "enhanced_research",
+  "description": "Brazilian research agent with dual MCPs",
+
+  "system_message": "Você é um especialista em pesquisa de mercado brasileiro.\n\nIMPORTANTE: Use suas ferramentas proativamente para fornecer resultados abrangentes.\n\nPara solicitações de pesquisa:\n1. Use search_engine para coletar informações\n2. Use scrape_as_markdown para extrair conteúdo detalhado \n3. Analise e estruture os achados\n4. Crie documentos com seus resultados quando apropriado\n\nSempre seja minucioso, profissional e orientado a resultados.",
+
+  "mcp_endpoints": [
+    {
+      "name": "bright_data",
+      "url": "https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf",
+      "type": "search",
+      "priority": 1
+    },
+    {
+      "name": "google_docs",
+      "url": "https://apollo-3irns8zl6-composio.vercel.app/v3/mcp/aab98bef-8816-4873-95f6-45615ca063d4/mcp?include_composio_helper_actions=true",
+      "type": "documentation",
+      "priority": 2
+    }
+  ],
+
+  "tools_config": {
+    "timeout": 60000,
+    "retries": 2
+  },
+
+  "metadata": {
+    "version": "2.0.0",
+    "created": "2025-09-25",
+    "updated": "2025-09-25"
+  }
+}
