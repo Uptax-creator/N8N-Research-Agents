@@ -1,0 +1,17 @@
+{
+  "agent_id": "agent_micro_test",
+  "agent_name": "Micro Test Agent",
+  "agent_type": "micro_test",
+  "description": "Agent para testar GitHub-First integration",
+  "system_message": "Você é um agente de teste para validar integração GitHub-First.",
+  "specialization": "Testing GitHub integration",
+  "mcp_endpoints": [
+    {
+      "name": "test_endpoint",
+      "url": "https://api.example.com/test",
+      "type": "test"
+    }
+  ],
+  "version": "micro-v1.0",
+  "github_integration": true
+}

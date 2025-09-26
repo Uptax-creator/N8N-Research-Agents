@@ -1,0 +1,439 @@
+{
+  "name": "work_1001",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "={{ $json.system_message }}"
+        }
+      },
+      "id": "1cbe6a26-97c8-41ac-aed0-9877c0d30375",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        -528
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "topP": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        736,
+        -240
+      ],
+      "id": "bfaa77c5-1f9e-4a83-a183-11cb41a4673d",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "fo1wxthXWXgY03J3",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.session_id }}"
+      },
+      "id": "4c2475d7-c28a-4114-b350-e16a5b982cb6",
+      "name": "Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Professional response formatting\nconst aiResponse = $('AI Agent').item.json;\nconst sessionContext = $('Agent Initializer').item.json.session_context;\n\nconsole.log('📝 Formatting response for:', sessionContext.agent_id);\n\n// Extract AI output\nconst aiOutput = aiResponse?.output || aiResponse?.text || 'No response generated';\n\n// Detect tools used (parsing from AI response)\nconst toolsUsed = [];\nif (aiOutput.toLowerCase().includes('search') || aiOutput.includes('bright_data')) {\n  toolsUsed.push('Bright Data Search');\n}\nif (aiOutput.includes('GOOGLEDOCS') || aiOutput.includes('docs.google.com')) {\n  toolsUsed.push('Google Docs');\n}\nif (aiOutput.includes('scrape_as_markdown') || aiOutput.toLowerCase().includes('scraping')) {\n  toolsUsed.push('Web Scraping');\n}\n\n// Extract links from response\nconst links = {\n  google_docs: aiOutput.match(/https:\\/\\/docs\\.google\\.com\\/document\\/d\\/[a-zA-Z0-9_-]+/)?.[0],\n  sources: [...(aiOutput.match(/https?:\\/\\/[^\\s\\)]+/g) || [])]\n    .filter(url => !url.includes('docs.google.com'))\n    .slice(0, 5)\n};\n\n// Apply output format from prompt data\nconst outputFormat = sessionContext.prompt_data?.output_requirements?.format || 'structured_json';\n\nlet formattedResponse;\n\nif (outputFormat === 'structured_json') {\n  formattedResponse = {\n    success: true,\n    session: {\n      id: sessionContext.session_id,\n      agent: sessionContext.agent_config.agent_type,\n      project_id: sessionContext.project_id,\n      agent_id: sessionContext.agent_id\n    },\n    request: {\n      query: sessionContext.session_context?.original_input?.query || 'No query',\n      timestamp: sessionContext.timestamp\n    },\n    response: {\n      content: aiOutput,\n      tools_used: toolsUsed,\n      links: links,\n      confidence_level: toolsUsed.length > 0 ? 0.9 : 0.7\n    },\n    metadata: {\n      workflow: 'uptax-proc-1001-dynamic',\n      config_source: sessionContext.config_source,\n      prompt_source: sessionContext.prompt_source,\n      execution_time_ms: Date.now() - parseInt(sessionContext.session_id.split('_')[2]),\n      version: '1.0.0-variables'\n    }\n  };\n} else {\n  // Other formats (html, yaml, etc.) can be handled here\n  formattedResponse = {\n    content: aiOutput,\n    format: outputFormat,\n    metadata: { /* minimal metadata */ }\n  };\n}\n\nconsole.log('✅ Response formatted successfully');\nif (links.google_docs) {\n  console.log('📄 Document created:', links.google_docs);\n}\n\nreturn [{ json: formattedResponse }];"
+      },
+      "id": "f10069c9-1aeb-4b45-9aa0-4417b31025f1",
+      "name": "Response Formatter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        -528
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "832abb32-d99a-463e-a774-2a070ce2749e",
+      "name": "Respond Enhanced",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1888,
+        -528
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "={{ $json.mcp_endpoint_http }}",
+        "serverTransport": "httpStreamable",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        -240
+      ],
+      "id": "98203676-4539-49fc-9674-2674a02237d1",
+      "name": "MCP Client - HTTP Streamable"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "={{ $json.mcp_endpoint_sse }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "26bfb8a4-40f1-44f1-9db4-e0c59fd95b14",
+      "name": "MCP Client - SSE",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "position": [
+        1152,
+        -240
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/assembly-logic/agents-registry-graph.csv",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "b2a7b9c7-6ce9-4177-8853-2949cf31d09e",
+      "name": "Load Graph CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -576,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Execute GitHub-loaded processor\nconst processorCode = $('Load Processor from GitHub').item.json.data;\nconst inputData = $('Webhook_Work_1001').item.json.body;\nconst csvData = $('Load Graph CSV').item.json.data;\n\n// Create execution context\nconst context = {\n  $: function(nodeName) {\n    if (nodeName === 'Webhook Enhanced') {\n      return { item: { json: { body: inputData } } };\n    }\n    if (nodeName === 'Load Graph CSV') {\n      return { item: { json: { data: csvData } } };\n    }\n  },\n  console: console,\n  Date: Date,\n  JSON: JSON\n};\n\n// Execute processor\ntry {\n  const func = new Function('$', 'console', 'Date', 'JSON',\n    processorCode + '; return execute();');\n  const result = await func(context.$, context.console, context.Date, context.JSON);\n  return result;\n} catch (error) {\n  return [{\n    json: {\n      success: false,\n      error: 'Processor execution failed',\n      details: error.message\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        -32
+      ],
+      "id": "9a6c63cb-8ece-45b9-baa4-e9a3e11deb75",
+      "name": "Execute Processor"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.prompt_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        144,
+        -32
+      ],
+      "id": "b2dbf89e-a3d8-4e6f-828f-c040cbd83116",
+      "name": "Load Prompt from GitHub"
+    },
+    {
+      "parameters": {
+        "url": "=https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/code/processors/graph-processor-dynamic.js",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -368,
+        -32
+      ],
+      "id": "6992e1a2-95e3-406c-8366-4bfbe08ae008",
+      "name": "Load Processor from GitHub"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare data for AI Agent\nconst processorData = $('Execute Processor').item.json;\nconst promptData = $('Load Prompt from GitHub').item.json.data;\n\nconsole.log('🎯 Preparing for AI Agent');\nconsole.log('📄 Prompt loaded:', promptData ? promptData.length : 0, 'chars');\n\n// Parse MCP endpoints do agent_config\nlet mcp_sse = null;\nlet mcp_http = null;\n\nif (processorData.agent_config?.mcp_endpoints) {\n  // Se for JSON string, parse\n  let endpoints = processorData.agent_config.mcp_endpoints;\n  if (typeof endpoints === 'string') {\n    try {\n      endpoints = JSON.parse(endpoints.replace(/\"\"/g, '\"'));\n    } catch (e) {\n      console.log('Failed to parse MCP endpoints');\n    }\n  }\n\n  // Encontrar cada tipo\n  if (Array.isArray(endpoints)) {\n    const brightData = endpoints.find(ep => ep.type === 'search' || ep.name === 'bright_data');\n    const googleDocs = endpoints.find(ep => ep.type === 'documentation' || ep.name === 'google_docs');\n\n    mcp_sse = brightData?.url || processorData.mcp_endpoint_sse;\n    mcp_http = googleDocs?.url || processorData.mcp_endpoint_http;\n  }\n}\n\n// Fallback para URLs conhecidas\nmcp_sse = mcp_sse || 'https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf';\nmcp_http = mcp_http || 'https://apollo-3irns8zl6-composio.vercel.app/v3/mcp/aab98bef-8816-4873-95f6-45615ca063d4/mcp?include_composio_helper_actions=true';\n\nreturn [{\n  json: {\n    text: processorData.text,\n    session_id: processorData.session_id,\n    system_message: promptData || `You are ${processorData.agent_config?.description}. Use your tools proactively.`,\n    mcp_endpoint_sse: mcp_sse,\n    mcp_endpoint_http: mcp_http,\n    agent_config: processorData.agent_config\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -32
+      ],
+      "id": "4bd5b0fb-23f6-4b79-af5e-3723a3ae390d",
+      "name": "Prepare for AI Agent"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/work-1001",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "77bd67a2-fb8e-45e3-83e2-41948edc45ea",
+      "name": "Webhook_Work_1001",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -560,
+        -528
+      ],
+      "webhookId": "graph-webhook-v2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Estrutura de entrada esperada\nconst input = $('Webhook Enhanced').item.json.body;\n\nconst context = {\n  // Dados da requisição\n  session_id: `${input.project_id}_${input.agent_id}_${Date.now()}`,\n  project_id: input.project_id || $vars.UPTAX_PROJECT_ID,\n  agent_id: input.agent_id || 'agent_001',\n  query: input.query || 'Default query',\n\n  // URLs dinâmicas usando variáveis\n  config_url: `${$vars.UPTAX_GITHUB_BASE}/agents/${input.agent_id || 'agent_001'}/config.json`,\n  prompt_url: `${$vars.UPTAX_GITHUB_BASE}/agents/${input.agent_id || 'agent_001'}/prompt.json`,\n\n  // Metadata\n  timestamp: new Date().toISOString(),\n  workflow_id: 'uptax-proc-1001-dynamic',\n  original_input: input\n};\n\nconsole.log('🎯 Context built for session:', context.session_id);\nreturn [{ json: context }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        -528
+      ],
+      "id": "bb7cbc09-7340-4d0b-a2df-16b4656b1868",
+      "name": "Context Builder"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Advanced cache manager\nconst context = $('Context Builder').item.json;\nconst staticData = getWorkflowStaticData('global');\nconst cacheKey = `config_${context.project_id}_${context.agent_id}`;\nconst CACHE_TTL = parseInt($vars.UPTAX_CACHE_TTL_MS);\n\n// Check cache first\nif (staticData[cacheKey] && staticData[cacheKey].timestamp) {\n  const cacheAge = Date.now() - staticData[cacheKey].timestamp;\n\n  if (cacheAge < CACHE_TTL) {\n    console.log('✅ Cache hit:', cacheKey);\n    return [{\n      json: {\n        ...context,\n        agent_config: staticData[cacheKey].data,\n        config_source: 'cache',\n        cache_age_ms: cacheAge\n      }\n    }];\n  }\n}\n\n// Cache miss - load from GitHub\ntry {\n  const response = await fetch(context.config_url);\n  const agentConfig = await response.json();\n\n  // Cache the config\n  staticData[cacheKey] = {\n    data: agentConfig,\n    timestamp: Date.now()\n  };\n\n  return [{\n    json: {\n      ...context,\n      agent_config: agentConfig,\n      config_source: 'github'\n    }\n  }];\n\n} catch (error) {\n  console.log('❌ Config loading failed:', error.message);\n  // Fallback config\n  return [{\n    json: {\n      ...context,\n      agent_config: {\n        agent_id: context.agent_id,\n        system_message: \"You are a helpful assistant.\",\n        mcp_endpoints: []\n      },\n      config_source: 'fallback',\n      config_error: error.message\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -528
+      ],
+      "id": "204a3aac-7602-4600-a2e0-4cb980e4200a",
+      "name": "Config Loader with Cache"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Load prompt.json from GitHub with cache\nconst data = $('Config Loader with Cache').item.json;\nconst staticData = getWorkflowStaticData('global');\nconst promptCacheKey = `prompt_${data.project_id}_${data.agent_id}`;\nconst CACHE_TTL = parseInt($vars.UPTAX_CACHE_TTL_MS);\n\n// Check prompt cache\nif (staticData[promptCacheKey] && staticData[promptCacheKey].timestamp) {\n  const cacheAge = Date.now() - staticData[promptCacheKey].timestamp;\n\n  if (cacheAge < CACHE_TTL) {\n    console.log('✅ Prompt cache hit:', promptCacheKey);\n    return [{\n      json: {\n        ...data,\n        prompt_data: staticData[promptCacheKey].data,\n        prompt_source: 'cache'\n      }\n    }];\n  }\n}\n\n// Load prompt from GitHub\ntry {\n  const response = await fetch(data.prompt_url);\n  const promptData = await response.json();\n\n  // Cache the prompt\n  staticData[promptCacheKey] = {\n    data: promptData,\n    timestamp: Date.now()\n  };\n\n  return [{\n    json: {\n      ...data,\n      prompt_data: promptData,\n      prompt_source: 'github'\n    }\n  }];\n\n} catch (error) {\n  console.log('❌ Prompt loading failed:', error.message);\n  // Fallback prompt\n  return [{\n    json: {\n      ...data,\n      prompt_data: {\n        system_message: \"You are a helpful assistant. Use your tools proactively.\",\n        instructions: [\"Be thorough\", \"Use available tools\", \"Provide structured responses\"]\n      },\n      prompt_source: 'fallback',\n      prompt_error: error.message\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -528
+      ],
+      "id": "65ddb14f-a279-471a-964b-e4b9bb38c3ce",
+      "name": "Prompt Loader with Cache"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare final data for AI Agent\nconst data = $('Prompt Loader with Cache').item.json;\n\nconsole.log('🤖 Initializing agent:', data.agent_config.agent_type);\n\n// Extract MCP endpoints from config\nlet mcp_sse = null;\nlet mcp_http = null;\n\nif (data.agent_config.mcp_endpoints && data.agent_config.mcp_endpoints.length > 0) {\n  mcp_sse = data.agent_config.mcp_endpoints.find(m => m.type === 'search')?.url;\n  mcp_http = data.agent_config.mcp_endpoints.find(m => m.type === 'documentation')?.url;\n}\n\n// Build system message from prompt data\nconst systemMessage = data.prompt_data.system_message + \"\\n\\n\" +\n  \"Instructions:\\n\" + data.prompt_data.instructions.join(\"\\n\") + \"\\n\\n\" +\n  \"Tools Available:\\n\" + Object.entries(data.prompt_data.tools_guidance || {})\n    .map(([tool, guidance]) => `- ${tool}: ${guidance}`).join(\"\\n\");\n\nreturn [{\n  json: {\n    // AI Agent inputs\n    text: data.query,\n    system_message: systemMessage,\n\n    // MCP endpoints\n    mcp_endpoint_sse: mcp_sse,\n    mcp_endpoint_http: mcp_http,\n\n    // Complete context for response formatter\n    session_context: {\n      session_id: data.session_id,\n      project_id: data.project_id,\n      agent_id: data.agent_id,\n      agent_config: data.agent_config,\n      prompt_data: data.prompt_data,\n      config_source: data.config_source,\n      prompt_source: data.prompt_source,\n      timestamp: data.timestamp\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -528
+      ],
+      "id": "9296e8ad-cadc-40ef-8447-3b5fea0e0142",
+      "name": "Agent Initializer"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response Formatter": {
+      "main": [
+        [
+          {
+            "node": "Respond Enhanced",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client - HTTP Streamable": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client - SSE": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Graph CSV": {
+      "main": [
+        []
+      ]
+    },
+    "Execute Processor": {
+      "main": [
+        []
+      ]
+    },
+    "Load Processor from GitHub": {
+      "main": [
+        []
+      ]
+    },
+    "Load Prompt from GitHub": {
+      "main": [
+        []
+      ]
+    },
+    "Prepare for AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Webhook_Work_1001": {
+      "main": [
+        [
+          {
+            "node": "Context Builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Context Builder": {
+      "main": [
+        [
+          {
+            "node": "Config Loader with Cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Loader with Cache": {
+      "main": [
+        [
+          {
+            "node": "Prompt Loader with Cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt Loader with Cache": {
+      "main": [
+        [
+          {
+            "node": "Agent Initializer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent Initializer": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "de319e2e-2fe2-41af-9f45-ceb0447d999f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cd5e44ae437f0c9ab2d07a5f9f48e7f2a5b6c7d370c2fb3ae41bd86053b66f9d"
+  },
+  "id": "scJSDgRWiHTkfNUn",
+  "tags": []
+}

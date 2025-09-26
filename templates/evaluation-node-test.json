@@ -1,0 +1,136 @@
+{
+  "name": "Evaluation Test Template - Parametrized",
+  "description": "Template parametrizável para testar nodes individuais ou configurações",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "setInputs",
+        "inputs": {
+          "values": [
+            {
+              "project_id": "project_001",
+              "agent_id": "agent_001",
+              "query": "{{ $vars.TEST_QUERY || 'Teste de pesquisa sobre IA no Brasil' }}",
+              "test_mode": true,
+              "debug": true
+            },
+            {
+              "webhook_url": "{{ $vars.WEBHOOK_URL || 'https://primary-production-56785.up.railway.app/webhook/work-1001' }}",
+              "github_base": "{{ $vars.UPTAX_GITHUB_BASE || 'https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment' }}",
+              "cache_ttl_ms": "{{ $vars.UPTAX_CACHE_TTL_MS || '300000' }}",
+              "timeout": "{{ $vars.DEFAULT_TIMEOUT || '60000' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.7,
+      "position": [100, 250],
+      "id": "evaluation-test-node",
+      "name": "Test Data Generator",
+      "notes": "Gera dados de teste parametrizáveis para validar workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Context Builder Test\nconst input = $input.first().json;\n\nconst context = {\n  session_id: `${input.project_id}_${input.agent_id}_${Date.now()}`,\n  project_id: input.project_id,\n  agent_id: input.agent_id,\n  query: input.query,\n  \n  // URLs dinâmicas\n  config_url: `${input.github_base}/agents/${input.agent_id}/config.json`,\n  prompt_url: `${input.github_base}/agents/${input.agent_id}/prompt.json`,\n  \n  // Metadata\n  timestamp: new Date().toISOString(),\n  test_mode: input.test_mode,\n  debug: input.debug\n};\n\nconsole.log('🧪 Test Context:', context);\nreturn [{ json: context }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 250],
+      "id": "context-builder-test",
+      "name": "Context Builder Test"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.config_url }}",
+        "options": {
+          "timeout": "={{ $json.timeout || 10000 }}",
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 250],
+      "id": "config-loader-test",
+      "name": "Config Loader Test",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validation Test\nconst context = $('Context Builder Test').item.json;\nconst configResponse = $('Config Loader Test').item;\n\nconst validation = {\n  context_valid: !!(context.session_id && context.project_id && context.agent_id),\n  config_loaded: !!(configResponse.json && !configResponse.error),\n  \n  test_results: {\n    session_created: context.session_id,\n    urls_generated: {\n      config: context.config_url,\n      prompt: context.prompt_url\n    },\n    config_status: configResponse.error ? 'FAILED' : 'SUCCESS',\n    config_data: configResponse.json || configResponse.error,\n    test_timestamp: new Date().toISOString()\n  },\n  \n  // Debug info\n  debug: {\n    input_data: $('Test Data Generator').item.json,\n    context_data: context,\n    config_response: configResponse\n  }\n};\n\nconsole.log('✅ Validation Results:', validation);\nreturn [{ json: validation }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 250],
+      "id": "validation-test",
+      "name": "Validation & Results"
+    }
+  ],
+  "connections": {
+    "Test Data Generator": {
+      "main": [
+        [
+          {
+            "node": "Context Builder Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Context Builder Test": {
+      "main": [
+        [
+          {
+            "node": "Config Loader Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Loader Test": {
+      "main": [
+        [
+          {
+            "node": "Validation & Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {
+    "Test Data Generator": [
+      {
+        "json": {
+          "project_id": "project_001",
+          "agent_id": "agent_001",
+          "query": "Teste básico de configuração",
+          "test_mode": true,
+          "debug": true,
+          "webhook_url": "https://primary-production-56785.up.railway.app/webhook/work-1001",
+          "github_base": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment",
+          "cache_ttl_ms": "300000",
+          "timeout": "10000"
+        }
+      }
+    ]
+  },
+  "meta": {
+    "templateId": "evaluation-test-001",
+    "description": "Template para testar nodes isoladamente com dados parametrizáveis",
+    "version": "1.0.0",
+    "author": "UPTAX Sprint 3",
+    "usage": "Import este template e execute para validar configurações e conectividade"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "mcpServers": {
+    "figma-composer": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://apollo.composio.dev/v3/mcp/5fb7521d-9abf-4a88-84b6-785b0b063ad5/mcp?include_composio_helper_actions=true"
+      ],
+      "env": {
+        "npm_config_yes": "true"
+      }
+    },
+    "n8n-mcp-dev": {
+      "command": "n8n-mcp-server",
+      "args": [],
+      "env": {
+        "N8N_API_URL": "https://primary-production-56785.up.railway.app",
+        "N8N_API_KEY": "YOUR_API_KEY_HERE"
+      }
+    },
+    "linear-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-server-linear"
+      ]
+    },
+    "brightdata": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@brightdata/mcp-server"
+      ],
+      "env": {
+        "BRIGHT_DATA_API_KEY": "YOUR_BRIGHT_DATA_KEY"
+      }
+    },
+    "ide": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@vscode/mcp-server"
+      ],
+      "env": {
+        "VSCODE_PATH": "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
+      }
+    }
+  }
+}
