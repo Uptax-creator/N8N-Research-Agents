@@ -114,12 +114,21 @@ async function loadAgentFromRegistry(ssv, fetch) {
 
   console.log('🔍 Loading CSV registry from:', registryUrl);
 
-  const response = await fetch(registryUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to load CSV registry: HTTP ${response.status}`);
-  }
+  try {
+    const response = await fetch(registryUrl);
+    let csvText;
 
-  const csvText = await response.text();
+    if (typeof response.text === 'function') {
+      csvText = await response.text();
+    } else if (typeof response === 'string') {
+      csvText = response;
+    } else {
+      csvText = response.body || response.data || '';
+    }
+
+    if (!csvText) {
+      throw new Error('Empty CSV response');
+    }
   const csvData = parseCSV(csvText);
 
   console.log('📊 CSV registry loaded, entries:', csvData.length);
