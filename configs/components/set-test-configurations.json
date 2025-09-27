@@ -1,0 +1,119 @@
+{
+  "name": "Set Test Configurations",
+  "description": "Comprehensive test suite for evaluation nodes",
+  "version": "1.0.0",
+  "github_source": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/configs/components/set-test-configurations.json",
+  "assignments": [
+    {
+      "id": "test_1_connectivity",
+      "name": "test_1_basic_connectivity",
+      "type": "object",
+      "value": {
+        "name": "Conectividade Básica",
+        "description": "Valida GitHub connectivity e config loading básico",
+        "payload": {
+          "project_id": "project_001",
+          "agent_id": "agent_001",
+          "query": "teste conectividade",
+          "test_mode": true,
+          "debug": true
+        },
+        "expected_results": {
+          "config_loaded": true,
+          "github_connectivity": true,
+          "performance_under_5s": true,
+          "status": "SUCCESS"
+        },
+        "validation_points": [
+          "HTTP request successful",
+          "JSON config parsed",
+          "Session ID generated",
+          "Performance metrics calculated"
+        ]
+      }
+    },
+    {
+      "id": "test_2_fallback",
+      "name": "test_2_agent_inexistente",
+      "type": "object",
+      "value": {
+        "name": "Agent Inexistente",
+        "description": "Valida error handling e fallback behavior",
+        "payload": {
+          "project_id": "project_001",
+          "agent_id": "agent_999",
+          "query": "teste fallback",
+          "test_mode": true,
+          "debug": true
+        },
+        "expected_results": {
+          "config_loaded": false,
+          "github_connectivity": true,
+          "error_handled": true,
+          "workflow_continues": true,
+          "status": "FAILED_GRACEFULLY"
+        },
+        "validation_points": [
+          "404 error captured",
+          "continueOnFail working",
+          "Error details available",
+          "Workflow completion"
+        ]
+      }
+    },
+    {
+      "id": "test_3_performance",
+      "name": "test_3_performance_validation",
+      "type": "object",
+      "value": {
+        "name": "Performance Validation",
+        "description": "Valida performance metrics e timeout handling",
+        "payload": {
+          "project_id": "project_001",
+          "agent_id": "agent_001",
+          "query": "teste performance",
+          "timeout": 5000,
+          "test_mode": true,
+          "debug": true,
+          "performance_tracking": true
+        },
+        "expected_results": {
+          "config_loaded": true,
+          "performance_under_5s": true,
+          "duration_ms": "< 5000",
+          "performance_grade": "A",
+          "status": "PERFORMANCE_OK"
+        },
+        "validation_points": [
+          "Start time recorded",
+          "End time recorded",
+          "Duration calculated",
+          "Performance grade assigned"
+        ]
+      }
+    },
+    {
+      "id": "test_suite_config",
+      "name": "test_suite_configuration",
+      "type": "object",
+      "value": {
+        "suite_name": "Evaluation Node Test Suite",
+        "version": "1.0.0",
+        "description": "Comprehensive test suite for evaluation nodes",
+        "total_tests": 3,
+        "execution_mode": "sequential",
+        "global_config": {
+          "github_base": "https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment",
+          "default_timeout": 10000,
+          "retry_attempts": 2,
+          "debug_enabled": true
+        },
+        "success_criteria": {
+          "min_passing_tests": 2,
+          "required_performance": "< 5000ms",
+          "error_tolerance": "graceful_failure"
+        }
+      }
+    }
+  ]
+}
