@@ -1,0 +1,178 @@
+{
+  "name": "BASELINE Observable - Sprint 1",
+  "description": "Workflow baseline com observabilidade para validar fundamentos da arquitetura 4-nodes",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "baseline-test",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [100, 200],
+      "id": "webhook-baseline",
+      "name": "Webhook Baseline",
+      "notes": "Recebe requests para teste baseline"
+    },
+    {
+      "parameters": {
+        "operation": "setInputs",
+        "inputs": {
+          "values": [
+            {
+              "test_type": "baseline",
+              "webhook_data": "={{ $json.body }}",
+              "session_id": "baseline_{{ new Date().getTime() }}",
+              "github_base": "{{ $vars.UPTAX_GITHUB_BASE || 'https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment' }}",
+              "agent_id": "{{ $json.body.agent_id || 'agent_micro_test' }}",
+              "test_query": "{{ $json.body.query || 'Teste baseline observabilidade' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.7,
+      "position": [400, 200],
+      "id": "evaluation-baseline",
+      "name": "Evaluation Baseline",
+      "notes": "Processa e parametriza dados do webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Baseline Agent Info Processor (Node 1 prototype)\nconst webhookData = $input.first().json;\nconst requestData = webhookData.webhook_data || {};\n\n// SSV Structure (Server Side Variables)\nconst ssv = {\n  // Request tracking\n  session_id: webhookData.session_id,\n  timestamp: new Date().toISOString(),\n  \n  // Workflow config\n  workflow_config: {\n    github_base: webhookData.github_base,\n    registry_csv_url: `${webhookData.github_base}/assembly-logic/agents-registry-updated.csv`,\n    default_timeout: 10000\n  },\n  \n  // Request data\n  request_data: {\n    agent_id: webhookData.agent_id,\n    query: webhookData.test_query,\n    test_mode: true,\n    format: requestData.format || 'json'\n  },\n  \n  // Runtime context\n  runtime: {\n    node_version: '1.0-baseline',\n    debug: true,\n    performance: {\n      start_time: Date.now()\n    }\n  }\n};\n\n// URLs dinâmicas baseadas no agent_id\nssv.workflow_config.agent_config_url = `${ssv.workflow_config.github_base}/configs/agents/${ssv.request_data.agent_id}.json`;\nssv.workflow_config.agent_prompt_url = `${ssv.workflow_config.github_base}/configs/agents/${ssv.request_data.agent_id}_prompt.json`;\n\nconsole.log('🏗️ [Node 1] Agent Info Processor - SSV Created:', ssv);\n\nreturn [{ json: ssv }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 200],
+      "id": "agent-info-processor",
+      "name": "Node 1: Agent Info Processor",
+      "notes": "Protótipo do Node 1 da arquitetura 4-nodes"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.workflow_config.agent_config_url }}",
+        "options": {
+          "timeout": "={{ $json.workflow_config.default_timeout }}",
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1000, 200],
+      "id": "github-config-loader",
+      "name": "Node 2: GitHub Config Loader",
+      "continueOnFail": true,
+      "notes": "Protótipo do Node 2 - carrega config do GitHub"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Baseline Response Formatter\nconst ssv = $('Node 1: Agent Info Processor').item.json;\nconst configResponse = $('Node 2: GitHub Config Loader').item;\n\n// Performance metrics\nssv.runtime.performance.end_time = Date.now();\nssv.runtime.performance.duration_ms = ssv.runtime.performance.end_time - ssv.runtime.performance.start_time;\n\n// Validation results\nconst validation = {\n  success: true,\n  session_id: ssv.session_id,\n  timestamp: ssv.timestamp,\n  \n  // Node validations\n  node_validations: {\n    node_1_agent_info: {\n      ssv_created: !!(ssv.session_id && ssv.workflow_config),\n      urls_generated: !!(ssv.workflow_config.agent_config_url),\n      status: 'SUCCESS'\n    },\n    node_2_github_config: {\n      config_loaded: !configResponse.error,\n      status: configResponse.error ? 'FAILED' : 'SUCCESS',\n      config_url: ssv.workflow_config.agent_config_url,\n      error: configResponse.error?.message || null\n    }\n  },\n  \n  // Performance\n  performance: ssv.runtime.performance,\n  \n  // Data flow validation\n  data_flow: {\n    webhook_received: !!(ssv.request_data.agent_id),\n    ssv_preserved: !!(ssv.workflow_config && ssv.request_data),\n    github_integration: !configResponse.error\n  },\n  \n  // Debug info\n  debug: {\n    agent_id: ssv.request_data.agent_id,\n    query: ssv.request_data.query,\n    config_response: configResponse.json || configResponse.error\n  }\n};\n\nconsole.log('✅ [BASELINE] Validation Complete:', validation);\n\nreturn [{ json: validation }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 200],
+      "id": "response-formatter",
+      "name": "Node 4: Response Formatter",
+      "notes": "Protótipo do Node 4 - formata resposta final"
+    },
+    {
+      "parameters": {
+        "respondWith": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1600, 200],
+      "id": "respond-webhook",
+      "name": "Respond Webhook",
+      "notes": "Retorna resultados da validação"
+    }
+  ],
+  "connections": {
+    "Webhook Baseline": {
+      "main": [
+        [
+          {
+            "node": "Evaluation Baseline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluation Baseline": {
+      "main": [
+        [
+          {
+            "node": "Node 1: Agent Info Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Node 1: Agent Info Processor": {
+      "main": [
+        [
+          {
+            "node": "Node 2: GitHub Config Loader",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Node 2: GitHub Config Loader": {
+      "main": [
+        [
+          {
+            "node": "Node 4: Response Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Node 4: Response Formatter": {
+      "main": [
+        [
+          {
+            "node": "Respond Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateId": "baseline-observable-v1",
+    "description": "Workflow baseline para Sprint 1 com protótipos dos Nodes 1, 2 e 4",
+    "version": "1.0.0",
+    "author": "UPTAX Sprint 3",
+    "notes": [
+      "- Implementa observabilidade completa do fluxo",
+      "- Protótipo da arquitetura 4-nodes",
+      "- Valida GitHub integration",
+      "- Preserva contexto SSV entre nodes",
+      "- Performance monitoring integrado"
+    ],
+    "test_endpoint": "POST /webhook/baseline-test",
+    "success_criteria": [
+      "Webhook receiving data",
+      "SSV structure created and preserved",
+      "GitHub config loading (com fallback)",
+      "Performance < 5s",
+      "100% observability"
+    ]
+  }
+}

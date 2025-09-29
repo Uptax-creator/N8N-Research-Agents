@@ -57,7 +57,7 @@
       "args": [],
       "env": {
         "N8N_API_URL": "https://primary-production-56785.up.railway.app",
-        "N8N_API_KEY": "YOUR_N8N_API_KEY"
+        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyYzFjNDQxNy00NWQwLTRhODktYTZiMy01Y2JhMjdhY2Q0MzkiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU4OTI0ODg3LCJleHAiOjE3NjY2Mzg4MDB9.OJiDGs9W0LGPOHxJYnBC6_HUSGtsGMzP4YWcP2DJoVc"
       }
     },
     "brightdata": {
