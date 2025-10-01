@@ -1,0 +1,6 @@
+# Force-Tools v2.6 Deploy
+Timestamp: Wed Oct  1 12:44:23 -03 2025
+Files ready for GitHub upload:
+- agent_001_enhanced_research_v2.6.json
+- agent_002_fiscal_research_v2.6.json
+- agent_003_gdocs_documentation_v2.6.json
