@@ -1,0 +1,437 @@
+{
+  "meta": {
+    "instanceId": "work_1002_v2.0_dual_mcp"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "path": "work_1002_v2_dual_mcp",
+        "responseMode": "responseNode",
+        "options": {
+          "onError": "continueRegularOutput"
+        }
+      },
+      "id": "webhook_trigger_work1002_dual_mcp",
+      "name": "Webhook Trigger work_1002 DUAL MCP",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ✅ PRE-OBSERVABILITY v2.0 - work_1002 DUAL MCP\n// Carregado do GitHub\nconst response = await fetch('https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/components/observability/pre-observability-v2.0.js');\nconst componentCode = await response.text();\n\n// Executar código do componente\neval(componentCode);"
+      },
+      "id": "pre_observability_v2_dual_mcp",
+      "name": "Pre-Observability v2.0 DUAL MCP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ✅ CSV LOADER v2.6 DUAL MCP - work_1002\n// Carregado do GitHub\nconst response = await fetch('https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/components/core/csv-loader-v2.6-DUAL-MCP.js');\nconst componentCode = await response.text();\n\n// Executar código do componente\neval(componentCode);"
+      },
+      "id": "csv_loader_v26_dual_mcp",
+      "name": "CSV Loader v2.6 DUAL MCP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ✅ POST-LOAD OBSERVABILITY v2.0 - work_1002 DUAL MCP\n// Carregado do GitHub\nconst response = await fetch('https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/components/observability/post-load-observability-v2.0.js');\nconst componentCode = await response.text();\n\n// Executar código do componente\neval(componentCode);"
+      },
+      "id": "post_load_observability_v2_dual_mcp",
+      "name": "Post-Load Observability v2.0 DUAL MCP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ✅ PREPARE AGENT v2.6 DUAL MCP - work_1002\n// Carregado do GitHub\nconst response = await fetch('https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/components/core/prepare-agent-v2.6-DUAL-MCP.js');\nconst componentCode = await response.text();\n\n// Executar código do componente\neval(componentCode);"
+      },
+      "id": "prepare_agent_v26_dual_mcp",
+      "name": "Prepare Agent v2.6 DUAL MCP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ✅ PRE-LLM OBSERVABILITY v2.0 DUAL MCP - work_1002\n// Carregado do GitHub\nconst response = await fetch('https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/components/observability/pre-llm-observability-v2.0-DUAL-MCP.js');\nconst componentCode = await response.text();\n\n// Executar código do componente\neval(componentCode);"
+      },
+      "id": "pre_llm_observability_v2_dual_mcp",
+      "name": "Pre-LLM Observability v2.0 DUAL MCP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ✅ OPTIMIZATION ENGINE v2.0 - work_1002 DUAL MCP\n// Carregado do GitHub\nconst response = await fetch('https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/components/optimization/optimization-engine-v2.0.js');\nconst componentCode = await response.text();\n\n// Executar código do componente\neval(componentCode);"
+      },
+      "id": "optimization_engine_v2_dual_mcp",
+      "name": "Optimization Engine v2.0 DUAL MCP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.mcp_endpoint_http }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-MCP-Architecture",
+              "value": "DUAL_ENDPOINTS"
+            },
+            {
+              "name": "X-Agent-ID",
+              "value": "={{ $json.agent_config.agent_id }}"
+            },
+            {
+              "name": "X-MCP-Provider",
+              "value": "={{ $json.agent_config.mcp_provider }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.agent_context.system_message }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.agent_context.text }}"
+            },
+            {
+              "name": "session_id",
+              "value": "={{ $json.agent_context.session_id }}"
+            },
+            {
+              "name": "dual_mcp_config",
+              "value": "={{ JSON.stringify($json.dual_mcp_config) }}"
+            },
+            {
+              "name": "mcp_endpoint_1",
+              "value": "={{ $json.mcp_endpoint_http_1 }}"
+            },
+            {
+              "name": "mcp_endpoint_2",
+              "value": "={{ $json.mcp_endpoint_http_2 }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000,
+          "retry": {
+            "enabled": true,
+            "maxRetries": 2
+          }
+        }
+      },
+      "id": "ai_agent_execution_dual_mcp",
+      "name": "AI Agent Execution DUAL MCP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check_mcp_response",
+      "name": "Check MCP Response",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ✅ FALLBACK MCP EXECUTOR - Tenta o outro endpoint se falhar\nconst inputData = $input.first().json;\n\nconsole.log('🔄 [FALLBACK MCP] Tentando endpoint alternativo');\n\n// Determinar endpoint alternativo\nlet fallbackEndpoint;\nif (inputData.mcp_endpoint_http === inputData.mcp_endpoint_http_1) {\n  fallbackEndpoint = inputData.mcp_endpoint_http_2;\n  console.log('🔄 [FALLBACK MCP] Mudando de Bright Data para Composio');\n} else {\n  fallbackEndpoint = inputData.mcp_endpoint_http_1;\n  console.log('🔄 [FALLBACK MCP] Mudando de Composio para Bright Data');\n}\n\n// Atualizar dados para nova tentativa\nconst fallbackData = {\n  ...inputData,\n  mcp_endpoint_http: fallbackEndpoint,\n  fallback_attempt: true,\n  original_endpoint: inputData.mcp_endpoint_http,\n  fallback_reason: 'primary_endpoint_failed'\n};\n\nconsole.log('🔄 [FALLBACK MCP] Endpoint alternativo:', fallbackEndpoint);\n\nreturn [{ json: fallbackData }];"
+      },
+      "id": "mcp_fallback_executor",
+      "name": "MCP Fallback Executor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 500]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.mcp_endpoint_http }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-MCP-Architecture",
+              "value": "DUAL_ENDPOINTS_FALLBACK"
+            },
+            {
+              "name": "X-Agent-ID",
+              "value": "={{ $json.agent_config.agent_id }}"
+            },
+            {
+              "name": "X-MCP-Fallback",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.agent_context.system_message }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.agent_context.text }}"
+            },
+            {
+              "name": "session_id",
+              "value": "={{ $json.agent_context.session_id }}"
+            },
+            {
+              "name": "fallback_attempt",
+              "value": "={{ $json.fallback_attempt }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "ai_agent_fallback_execution",
+      "name": "AI Agent Fallback Execution",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2220, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ✅ POST-LLM OBSERVABILITY v2.0 DUAL MCP - work_1002\n// Carregado do GitHub\nconst response = await fetch('https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/components/observability/post-llm-observability-v2.0.js');\nconst componentCode = await response.text();\n\n// Executar código do componente\neval(componentCode);"
+      },
+      "id": "post_llm_observability_v2_dual_mcp",
+      "name": "Post-LLM Observability v2.0 DUAL MCP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ✅ RESPONSE FORMATTER v2.0 DUAL MCP - work_1002\n// Carregado do GitHub\nconst response = await fetch('https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/components/observability/response-formatter-v2.0.js');\nconst componentCode = await response.text();\n\n// Executar código do componente\neval(componentCode);"
+      },
+      "id": "response_formatter_v2_dual_mcp",
+      "name": "Response Formatter v2.0 DUAL MCP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2660, 300]
+    },
+    {
+      "parameters": {},
+      "id": "respond_to_webhook_dual_mcp",
+      "name": "Respond to Webhook DUAL MCP",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2880, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger work_1002 DUAL MCP": {
+      "main": [
+        [
+          {
+            "node": "Pre-Observability v2.0 DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pre-Observability v2.0 DUAL MCP": {
+      "main": [
+        [
+          {
+            "node": "CSV Loader v2.6 DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CSV Loader v2.6 DUAL MCP": {
+      "main": [
+        [
+          {
+            "node": "Post-Load Observability v2.0 DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post-Load Observability v2.0 DUAL MCP": {
+      "main": [
+        [
+          {
+            "node": "Prepare Agent v2.6 DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Agent v2.6 DUAL MCP": {
+      "main": [
+        [
+          {
+            "node": "Pre-LLM Observability v2.0 DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pre-LLM Observability v2.0 DUAL MCP": {
+      "main": [
+        [
+          {
+            "node": "Optimization Engine v2.0 DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Optimization Engine v2.0 DUAL MCP": {
+      "main": [
+        [
+          {
+            "node": "AI Agent Execution DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent Execution DUAL MCP": {
+      "main": [
+        [
+          {
+            "node": "Check MCP Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check MCP Response": {
+      "main": [
+        [
+          {
+            "node": "Post-LLM Observability v2.0 DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MCP Fallback Executor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Fallback Executor": {
+      "main": [
+        [
+          {
+            "node": "AI Agent Fallback Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent Fallback Execution": {
+      "main": [
+        [
+          {
+            "node": "Post-LLM Observability v2.0 DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post-LLM Observability v2.0 DUAL MCP": {
+      "main": [
+        [
+          {
+            "node": "Response Formatter v2.0 DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response Formatter v2.0 DUAL MCP": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook DUAL MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-10-01T16:40:00.000Z",
+      "updatedAt": "2025-10-01T16:40:00.000Z",
+      "id": "work_1002_v2_dual_mcp",
+      "name": "work_1002_v2.0_dual_mcp"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-01T16:40:00.000Z",
+  "versionId": "v2.0_dual_mcp"
+}
