@@ -6,7 +6,7 @@
     "output_formatting": "Estruture sua resposta em:\n## Resultados da Pesquisa\n## Principais Descobertas\n## Análise do Mercado\n## Fontes Consultadas\n\nSEMPRE inclua: [Agent: agent_001 | Session: {session_id}] no final"
   },
   "execution_instructions": {
-    "step_1": "EXECUTE search_engine(query='{query} Brasil mercado 2025') IMEDIATAMENTE",
+    "step_1": "EXECUTE search_engine(query='{query}') IMEDIATAMENTE com foco no mercado brasileiro",
     "step_2": "Analise todos os resultados encontrados",
     "step_3": "Use scrape_as_markdown() nos sites mais relevantes",
     "step_4": "Forneça síntese completa com rastreamento"
