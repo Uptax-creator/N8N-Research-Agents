@@ -1,0 +1,50 @@
+{
+  "agent_001": {
+    "agent_id": "agent_001",
+    "agent_name": "Enhanced Research Agent",
+    "agent_type": "enhanced_research",
+    "description": "Agent with Bright Data tools for market research and trend analysis",
+    "project_id": "project_001",
+    "workflow_id": "work_1001_dynamic",
+    "status": "active",
+    "version": "2.6-dynamic",
+    "capabilities": ["market_research", "trend_analysis", "web_scraping"],
+    "max_iterations": 5
+  },
+  "agent_002": {
+    "agent_id": "agent_002",
+    "agent_name": "Fiscal Research Agent",
+    "agent_type": "fiscal_research",
+    "description": "Agent specialized in Brazilian fiscal and regulatory analysis",
+    "project_id": "project_001",
+    "workflow_id": "work_1001_dynamic",
+    "status": "active",
+    "version": "2.6-dynamic",
+    "capabilities": ["fiscal_analysis", "regulatory_research", "legal_search"],
+    "max_iterations": 3
+  },
+  "agent_003": {
+    "agent_id": "agent_003",
+    "agent_name": "Google Docs Creator Agent",
+    "agent_type": "gdocs_documentation",
+    "description": "Agent that creates comprehensive documents using Google Docs",
+    "project_id": "project_001",
+    "workflow_id": "work_1001_dynamic",
+    "status": "active",
+    "version": "2.6-dynamic",
+    "capabilities": ["document_creation", "markdown_processing", "gdocs_integration"],
+    "max_iterations": 2
+  },
+  "default": {
+    "agent_id": "fallback",
+    "agent_name": "Fallback Agent",
+    "agent_type": "general",
+    "description": "General purpose agent without external tools",
+    "project_id": "project_001",
+    "workflow_id": "work_1001_dynamic",
+    "status": "active",
+    "version": "1.0-stable",
+    "capabilities": ["general_analysis"],
+    "max_iterations": 1
+  }
+}

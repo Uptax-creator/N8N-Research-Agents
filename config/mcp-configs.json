@@ -1,0 +1,30 @@
+{
+  "agent_001": {
+    "endpoint": "https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf",
+    "provider": "bright_data",
+    "transport": "httpStreamable",
+    "tools": ["search_engine", "scrape_as_markdown"],
+    "timeout": 60000
+  },
+  "agent_002": {
+    "endpoint": "https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf",
+    "provider": "bright_data",
+    "transport": "httpStreamable",
+    "tools": ["search_engine"],
+    "timeout": 60000
+  },
+  "agent_003": {
+    "endpoint": "https://apollo-3irns8zl6-composio.vercel.app/v3/mcp/aab98bef-8816-4873-95f6-45615ca063d4/mcp",
+    "provider": "composio",
+    "transport": "httpStreamable",
+    "tools": ["GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN", "GOOGLEDOCS_CREATE_DOCUMENT"],
+    "timeout": 60000
+  },
+  "default": {
+    "endpoint": "https://mcp.brightdata.com/sse?token=ecfc6404fb9eb026a9c802196b8d5caaf131d63c0931f9e888e57077e6b1f8cf",
+    "provider": "bright_data",
+    "transport": "httpStreamable",
+    "tools": ["search_engine"],
+    "timeout": 60000
+  }
+}

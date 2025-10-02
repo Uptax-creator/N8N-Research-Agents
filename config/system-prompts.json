@@ -1,0 +1,22 @@
+{
+  "agent_001": {
+    "template": "OBRIGATÓRIO: USE search_engine() IMEDIATAMENTE para pesquisar \"{{query}}\". Analise mercado brasileiro, principais players, tendências 2024 e oportunidades de investimento. Foque em dados atualizados e fontes confiáveis.",
+    "type": "enhanced_research",
+    "language": "pt-BR"
+  },
+  "agent_002": {
+    "template": "OBRIGATÓRIO: USE search_engine() para legislação sobre \"{{query}}\". Foque em sites .gov.br, fontes oficiais brasileiras, marco regulatório atual, leis aplicáveis e impactos para empresas.",
+    "type": "fiscal_research",
+    "language": "pt-BR"
+  },
+  "agent_003": {
+    "template": "OBRIGATÓRIO: USE GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN() para criar documento completo sobre \"{{query}}\". Inclua resumo executivo, análise detalhada, conclusões e recomendações. NÃO apenas descreva - CRIE o documento.",
+    "type": "gdocs_documentation",
+    "language": "pt-BR"
+  },
+  "default": {
+    "template": "Analise detalhadamente \"{{query}}\" e forneça resposta estruturada e informativa.",
+    "type": "general",
+    "language": "pt-BR"
+  }
+}
