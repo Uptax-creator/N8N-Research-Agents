@@ -13,18 +13,19 @@ console.log('📋 Project ID:', project_id);
 console.log('📋 Date Now:', dateNow.toISOString());
 console.log('📋 Components para carregar:', Object.keys(componentUrls).length);
 
-// ✅ CARREGAR TODOS OS COMPONENTES EM PARALELO
+// ✅ CARREGAR TODOS OS COMPONENTES EM PARALELO (N8N COMPATIBLE)
 async function loadAllComponents() {
   try {
+    const axios = require('axios');
     const loadPromises = Object.entries(componentUrls).map(async ([key, url]) => {
       console.log(`🔗 Carregando ${key}: ${url}`);
-      const response = await fetch(url);
+      const response = await axios.get(url);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(`HTTP ${response.status} para ${key}: ${url}`);
       }
 
-      const data = url.endsWith('.json') ? await response.json() : await response.text();
+      const data = url.endsWith('.json') ? response.data : response.data;
       console.log(`✅ ${key} carregado:`, typeof data, data.length || Object.keys(data).length);
       return [key, data];
     });
