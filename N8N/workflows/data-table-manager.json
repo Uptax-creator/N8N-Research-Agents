@@ -1,0 +1,149 @@
+{
+  "name": "Data Table Manager",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "data-table-crud",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-data-table-crud",
+      "name": "Webhook - Data Table CRUD",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "data-table-crud-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========================================\n// NODE 1: LOAD DATA TABLE CRUD COMPONENT\n// ========================================\n\nconst GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/code';\n\n/**\n * Carrega componentes do GitHub\n */\nasync function loadFromGitHub(path) {\n  const url = `${GITHUB_RAW_BASE}${path}`;\n  const response = await fetch(url);\n  \n  if (!response.ok) {\n    throw new Error(`Failed to load ${path}: ${response.statusText}`);\n  }\n  \n  const code = await response.text();\n  \n  // Cria módulo temporário\n  const moduleExports = {};\n  const module = { exports: moduleExports };\n  \n  // Executa código\n  const fn = new Function('module', 'exports', 'require', code);\n  fn(module, moduleExports, require);\n  \n  return module.exports;\n}\n\n// Carrega componentes\nconst DataTableHelper = await loadFromGitHub('/loaders/data-table-helper-enhanced.js');\nconst DataTableCRUD = await loadFromGitHub('/processors/data-table-crud.js');\n\n// Inicializa\nconst helper = new DataTableHelper($input.item.json);\nconst crud = new DataTableCRUD(helper);\n\n// Extrai request do webhook\nconst request = $input.item.json.body || $input.item.json;\n\n// Validações básicas\nif (!request.operation) {\n  throw new Error('Missing required field: operation');\n}\n\nif (!request.table) {\n  throw new Error('Missing required field: table');\n}\n\n// Prepara envelope para próximo node\nreturn {\n  json: {\n    crud: crud,\n    helper: helper,\n    request: request,\n    webhook_data: $input.item.json,\n    loaded_at: new Date().toISOString(),\n    loader_version: '1.0.0'\n  }\n};"
+      },
+      "id": "node-load-crud",
+      "name": "Load CRUD Component",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========================================\n// NODE 2: EXECUTE CRUD OPERATION\n// ========================================\n\nconst { crud, request, webhook_data } = $input.item.json;\n\nlet result;\nlet error = null;\n\ntry {\n  // Executa operação via CRUD component\n  if (request.batch && Array.isArray(request.operations)) {\n    // Batch operations\n    result = await crud.executeBatch(request.operations);\n  } else {\n    // Single operation\n    result = await crud.execute(request);\n  }\n\n  // Envelope de sucesso\n  return {\n    json: {\n      success: true,\n      operation: request.operation,\n      table: request.table,\n      result: result,\n      webhook_data: webhook_data,\n      executed_at: new Date().toISOString()\n    }\n  };\n\n} catch (err) {\n  // Envelope de erro\n  return {\n    json: {\n      success: false,\n      operation: request.operation,\n      table: request.table,\n      error: err.message,\n      error_stack: err.stack,\n      webhook_data: webhook_data,\n      executed_at: new Date().toISOString()\n    }\n  };\n}"
+      },
+      "id": "node-execute-crud",
+      "name": "Execute CRUD Operation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ========================================\n// NODE 3: FORMAT RESPONSE\n// ========================================\n\nconst envelope = $input.item.json;\n\n// Formata resposta HTTP\nconst httpResponse = {\n  statusCode: envelope.success ? 200 : 400,\n  headers: {\n    'Content-Type': 'application/json',\n    'X-Workflow-Id': envelope.webhook_data.workflow_id || 'unknown',\n    'X-Execution-Time': envelope.executed_at\n  },\n  body: {\n    success: envelope.success,\n    operation: envelope.operation,\n    table: envelope.table,\n    result: envelope.result || null,\n    error: envelope.error || null,\n    timestamp: envelope.executed_at\n  }\n};\n\n// Log para troubleshooting\nif (!envelope.success) {\n  console.error('[DATA_TABLE_CRUD_ERROR]', {\n    operation: envelope.operation,\n    table: envelope.table,\n    error: envelope.error,\n    stack: envelope.error_stack\n  });\n} else {\n  console.log('[DATA_TABLE_CRUD_SUCCESS]', {\n    operation: envelope.operation,\n    table: envelope.table,\n    result_type: typeof envelope.result\n  });\n}\n\nreturn {\n  json: httpResponse\n};"
+      },
+      "id": "node-format-response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "={{ $json.headers['Content-Type'] }}"
+              },
+              {
+                "name": "X-Workflow-Id",
+                "value": "={{ $json.headers['X-Workflow-Id'] }}"
+              },
+              {
+                "name": "X-Execution-Time",
+                "value": "={{ $json.headers['X-Execution-Time'] }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-to-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Data Table CRUD": {
+      "main": [
+        [
+          {
+            "node": "Load CRUD Component",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load CRUD Component": {
+      "main": [
+        [
+          {
+            "node": "Execute CRUD Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute CRUD Operation": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "data-tables",
+      "id": "data-tables"
+    },
+    {
+      "name": "crud",
+      "id": "crud"
+    },
+    {
+      "name": "multi-tenant",
+      "id": "multi-tenant"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "uptax-meta-agent"
+  },
+  "versionId": "1.0.0"
+}
