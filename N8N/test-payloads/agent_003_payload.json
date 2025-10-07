@@ -1,0 +1,10 @@
+{
+  "agent_id": "agent_003",
+  "project_id": "project_001",
+  "workflow_id": "EJasUbpzoUUFzmzK",
+  "webhook_id": "work_1001",
+  "webhook_url": "https://primary-production-56785.up.railway.app/webhook/work_1001",
+  "agent_name": "GDocs Documentation Agent",
+  "agent_type": "documentation",
+  "description": "Automated documentation agent for Google Docs integration with structured output formatting"
+}

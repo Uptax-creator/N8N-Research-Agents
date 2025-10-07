@@ -1,0 +1,10 @@
+{
+  "agent_id": "agent_001",
+  "project_id": "project_001",
+  "workflow_id": "EJasUbpzoUUFzmzK",
+  "webhook_id": "work_1001",
+  "webhook_url": "https://primary-production-56785.up.railway.app/webhook/work_1001",
+  "agent_name": "Enhanced Research Agent",
+  "agent_type": "research",
+  "description": "Advanced research agent with Brazilian market focus and proactive analysis capabilities"
+}
