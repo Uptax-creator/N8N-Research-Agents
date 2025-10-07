@@ -19,9 +19,9 @@
  * @param {string} project_id - ID do projeto
  * @returns {Object} Resultado da validação
  */
-async function validateUniqueLatestConstraint(ctx, agent_id, project_id) {
+async function validateUniqueLatestConstraint($, agent_id, project_id) {
   try {
-    const allAgents = await ctx.getDataTableRows('agents');
+    const allAgents = await $.getDataTableRows('agents');
 
     const existingLatest = allAgents.filter(
       (agent) =>
