@@ -204,18 +204,20 @@ try {
 **Descoberta:**
 - `$` = Objeto para acessar Data Tables (`$.getDataTableRows`)
 - `this` = Contexto do workflow (`this.helpers.httpRequest`)
-- `ctx` = Parâmetro dos componentes (recebe `$`)
+- ~~`ctx`~~ = ❌ NÃO EXISTE no N8N! Use sempre `$`
 
 **Solução:**
 ```javascript
 // No Code Node: passar $
 const result = await myFunction(data, $);
 
-// No componente: receber como ctx
-async function myFunction(data, ctx) {
-  const records = await ctx.getDataTableRows('table');
+// No componente: receber TAMBÉM como $ (NÃO use ctx!)
+async function myFunction(data, $) {
+  const records = await $.getDataTableRows('table');
 }
 ```
+
+⚠️ **IMPORTANTE:** N8N NÃO reconhece `ctx`! Use `$` em todo lugar.
 
 ---
 
