@@ -13,13 +13,13 @@
 
 /**
  * Busca projeto por project_id
- * @param {Object} $ - N8N context
+ * @param {Object} ctx - N8N context ($ ou this)
  * @param {string} project_id - ID do projeto
  * @returns {Object} Resultado da busca
  */
-async function getProject($, project_id) {
+async function getProject(ctx, project_id) {
   try {
-    const allProjects = await $.getDataTableRows('projects');
+    const allProjects = await ctx.getDataTableRows('cad_projects');
 
     const project = allProjects.find(p => p.project_id === project_id);
 
@@ -51,13 +51,13 @@ async function getProject($, project_id) {
 
 /**
  * Lista todos os projetos
- * @param {Object} $ - N8N context
+ * @param {Object} ctx - N8N context ($ ou this)
  * @param {Object} filters - Filtros opcionais { status: 'active' }
  * @returns {Object} Lista de projetos
  */
-async function listProjects($, filters = {}) {
+async function listProjects(ctx, filters = {}) {
   try {
-    let allProjects = await $.getDataTableRows('projects');
+    let allProjects = await ctx.getDataTableRows('cad_projects');
 
     // Aplicar filtros
     if (filters.status) {
@@ -83,11 +83,11 @@ async function listProjects($, filters = {}) {
 
 /**
  * Lista apenas projetos ativos
- * @param {Object} $ - N8N context
+ * @param {Object} ctx - N8N context ($ ou this)
  * @returns {Object} Lista de projetos ativos
  */
-async function listActiveProjects($) {
-  return listProjects($, { status: 'active' });
+async function listActiveProjects(ctx) {
+  return listProjects(ctx, { status: 'active' });
 }
 
 /**
