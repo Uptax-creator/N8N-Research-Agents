@@ -18,9 +18,9 @@
  * @param {string} project_id - ID do projeto
  * @returns {Object} Resultado da validação
  */
-async function validateUniqueProjectId(ctx, project_id) {
+async function validateUniqueProjectId($, project_id) {
   try {
-    const allProjects = await ctx.getDataTableRows('projects');
+    const allProjects = await $.getDataTableRows('cad_projects');
 
     const existingProject = allProjects.find(
       (project) => project.project_id === project_id
@@ -87,8 +87,8 @@ async function mapProjectData(body, $ = null) {
   }
 
   // ✅ VALIDAÇÃO DE CONSTRAINT (se $ disponível)
-  if (ctx) {
-    const validation = await validateUniqueProjectId(ctx, data.project_id);
+  if ($) {
+    const validation = await validateUniqueProjectId($, data.project_id);
 
     if (!validation.valid) {
       const error = new Error(validation.message);

@@ -97,9 +97,9 @@ async function mapAgentData(body, $ = null) {
     throw new Error('Missing required field: agent_type');
   }
 
-  // ✅ VALIDAÇÃO DE CONSTRAINT (se ctx disponível)
-  if (ctx) {
-    const validation = await validateUniqueLatestConstraint(ctx, data.agent_id, data.project_id);
+  // ✅ VALIDAÇÃO DE CONSTRAINT (se $ disponível)
+  if ($) {
+    const validation = await validateUniqueLatestConstraint($, data.agent_id, data.project_id);
 
     if (!validation.valid) {
       const error = new Error(validation.message);
@@ -111,7 +111,7 @@ async function mapAgentData(body, $ = null) {
 
     // ⭐ AUTO-GERAR URLs DO GITHUB (busca configuração do projeto)
     if (!data.github_config_url || !data.github_prompts_url) {
-      const allProjects = await ctx.getDataTableRows('cad_projects');
+      const allProjects = await $.getDataTableRows('cad_projects');
       const project = allProjects.find(p => p.project_id === data.project_id);
 
       if (!project) {
