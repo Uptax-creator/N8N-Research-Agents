@@ -190,9 +190,3 @@ async function mapAgentData(body, $ = null) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { mapAgentData, validateUniqueLatestConstraint };
 }
-
-// Auto-execução em Code Node
-if (typeof $ !== 'undefined') {
-  const inputData = $input.all()[0].json;
-  return mapAgentData(inputData, $);
-}
