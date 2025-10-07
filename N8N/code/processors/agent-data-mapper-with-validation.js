@@ -1,0 +1,174 @@
+/**
+ * Agent Data Mapper - COM VALIDAÇÃO (código externo)
+ *
+ * IMPORTANTE: Este código RECEBE dados pré-carregados como parâmetros
+ * porque N8N Code Node v2 não tem acesso direto a $.getDataTableRows()
+ *
+ * @version 4.0.0 - Validação com dados pré-carregados
+ */
+
+/**
+ * Valida constraint: apenas 1 agent com is_latest=true por (agent_id + project_id)
+ * @param {Array} allAgents - Dados já carregados da tabela agents
+ * @param {string} agent_id - ID do agent
+ * @param {string} project_id - ID do projeto
+ * @returns {Object} Resultado da validação
+ */
+function validateUniqueLatestConstraint(allAgents, agent_id, project_id) {
+  const existingLatest = allAgents.filter(
+    (agent) =>
+      agent.agent_id === agent_id &&
+      agent.project_id === project_id &&
+      agent.is_latest === true
+  );
+
+  if (existingLatest.length === 0) {
+    return {
+      valid: true,
+      message: `✅ Can insert agent ${agent_id}`,
+      can_insert: true
+    };
+  }
+
+  if (existingLatest.length === 1) {
+    return {
+      valid: false,
+      constraint_violation: 'DUPLICATE_LATEST',
+      message: `❌ Agent ${agent_id} already exists in ${project_id} with is_latest=true (id=${existingLatest[0].id})`,
+      can_insert: false,
+      existing_agent: {
+        id: existingLatest[0].id,
+        version: existingLatest[0].version || 1,
+        created_at: existingLatest[0].created_at
+      },
+      suggestion: 'Use UPDATE operation to modify existing agent, or mark existing as inactive first'
+    };
+  }
+
+  return {
+    valid: false,
+    constraint_violation: 'MULTIPLE_LATEST',
+    message: `⚠️ DATA CORRUPTION: Found ${existingLatest.length} versions with is_latest=true for agent ${agent_id} in ${project_id}`,
+    can_insert: false,
+    corrupted_ids: existingLatest.map((a) => a.id),
+    suggestion: 'Fix data corruption: mark all but one as is_latest=false'
+  };
+}
+
+/**
+ * Mapeia dados do body do webhook para estrutura da tabela agents
+ * @param {Object} body - Dados recebidos do webhook
+ * @param {Array} allAgents - Dados já carregados da tabela agents
+ * @param {Array} allProjects - Dados já carregados da tabela cad_projects
+ * @returns {Object} Dados mapeados para inserção
+ */
+function mapAgentData(body, allAgents, allProjects) {
+  const data = body.data || body;
+
+  // Validações obrigatórias
+  if (!data.agent_id) {
+    throw new Error('Missing required field: agent_id');
+  }
+
+  if (!data.project_id) {
+    throw new Error('Missing required field: project_id');
+  }
+
+  if (!data.agent_type) {
+    throw new Error('Missing required field: agent_type');
+  }
+
+  // ✅ VALIDAÇÃO DE CONSTRAINT (se dados disponíveis)
+  if (allAgents && allAgents.length >= 0) {
+    const validation = validateUniqueLatestConstraint(allAgents, data.agent_id, data.project_id);
+
+    if (!validation.valid) {
+      const error = new Error(validation.message);
+      error.constraint_violation = validation.constraint_violation;
+      error.existing_agent = validation.existing_agent;
+      error.suggestion = validation.suggestion;
+      throw error;
+    }
+  }
+
+  // ⭐ AUTO-GERAR URLs DO GITHUB (se dados disponíveis)
+  if (allProjects && allProjects.length > 0) {
+    if (!data.github_config_url || !data.github_prompts_url) {
+      const project = allProjects.find(p => p.project_id === data.project_id);
+
+      if (!project) {
+        throw new Error(`Project ${data.project_id} not found in Data Tables`);
+      }
+
+      // Validar se projeto tem configuração GitHub completa
+      if (!project.repository_url || !project.branch || !project.agents_base_path || !project.prompts_base_path) {
+        throw new Error(`Project ${data.project_id} missing GitHub configuration (repository_url, branch, agents_base_path, prompts_base_path)`);
+      }
+
+      // Montar URL base
+      const baseUrl = `${project.repository_url}/raw/${project.branch}`;
+
+      // Auto-gerar URLs
+      data.github_config_url = `${baseUrl}/${project.agents_base_path}${data.agent_id}/config.json`;
+      data.github_prompts_url = `${baseUrl}/${project.prompts_base_path}${data.agent_id}_prompts.json`;
+
+      console.log(`✅ GitHub URLs auto-generated from project ${project.project_id}:`);
+      console.log(`   Config: ${data.github_config_url}`);
+      console.log(`   Prompts: ${data.github_prompts_url}`);
+    }
+  }
+
+  // Mapeia campos
+  const mapped = {
+    agent_id: data.agent_id.trim(),
+    project_id: data.project_id.trim(),
+    workflow_id: data.workflow_id?.trim() || null,
+    webhook_id: data.webhook_id?.trim() || null,
+    webhook_url: data.webhook_url?.trim() || null,
+    agent_name: data.agent_name?.trim() || data.agent_id,
+    agent_type: data.agent_type.trim(),
+    description: data.description?.trim() || '',
+    github_config_url: data.github_config_url?.trim() || null,
+    github_prompts_url: data.github_prompts_url?.trim() || null,
+
+    // ⭐ Soft Delete Parcial com is_latest
+    is_latest: true,              // ✅ Sempre true para novos agents
+    version: data.version || 1,   // ✅ Versão inicial
+    status: 'active',             // ✅ Status sempre active
+    deleted_at: null,
+    superseded_by: null,
+
+    // Timestamps
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+
+  // Validação de URLs GitHub (se fornecidas)
+  if (mapped.github_config_url && !mapped.github_config_url.startsWith('https://')) {
+    throw new Error('Invalid github_config_url: must be a valid HTTPS URL');
+  }
+
+  if (mapped.github_prompts_url && !mapped.github_prompts_url.startsWith('https://')) {
+    throw new Error('Invalid github_prompts_url: must be a valid HTTPS URL');
+  }
+
+  // Validação de webhook_url (se fornecida)
+  if (mapped.webhook_url && !mapped.webhook_url.startsWith('https://')) {
+    throw new Error('Invalid webhook_url: must be a valid HTTPS URL');
+  }
+
+  // Validação de status
+  const validStatuses = ['active', 'inactive', 'deprecated', 'archived'];
+  if (!validStatuses.includes(mapped.status)) {
+    throw new Error(`Invalid status: ${mapped.status}. Must be one of: ${validStatuses.join(', ')}`);
+  }
+
+  console.log(`✅ Agent data mapped successfully: ${mapped.agent_id} v${mapped.version}`);
+
+  return mapped;
+}
+
+// Export para N8N Code Node
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { mapAgentData, validateUniqueLatestConstraint };
+}
