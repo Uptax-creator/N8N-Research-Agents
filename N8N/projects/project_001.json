@@ -1,0 +1,17 @@
+{
+  "project_id": "project_001",
+  "project_name": "UptaxDev Multi-Agent System",
+  "description": "Sistema multi-agente para pesquisa e análise fiscal com integração GitHub e Data Tables",
+  "owner_email": "kleber.ribeiro@uptax.net",
+  "status": "active",
+
+  "repository_url": "https://github.com/Uptax-creator/N8N-Research-Agents",
+  "branch": "clean-deployment",
+  "code_base_path": "N8N/code/",
+  "prompts_base_path": "N8N/prompts/agents/",
+  "agents_base_path": "N8N/agents/",
+  "projects_base_path": "N8N/projects/",
+
+  "created_at": "2025-01-15T10:00:00.000Z",
+  "updated_at": "2025-10-07T10:00:00.000Z"
+}
