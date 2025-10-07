@@ -195,15 +195,5 @@ if (typeof module !== 'undefined' && module.exports) {
   };
 }
 
-// Auto-execução em Code Node
-if (typeof $ !== 'undefined') {
-  const inputData = $input.all()[0].json;
-
-  // Se receber project_id, busca projeto específico
-  if (inputData.project_id) {
-    return getProject($, inputData.project_id);
-  }
-
-  // Senão, lista todos os projetos ativos
-  return listActiveProjects($);
-}
+// NOTA: Auto-execução removida para compatibilidade com N8N Code Node
+// O Code Node deve chamar as funções manualmente
