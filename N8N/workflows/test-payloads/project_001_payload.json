@@ -1,0 +1,7 @@
+{
+  "project_name": "UPTAX Meta Agent System",
+  "company_name": "UPTAX Soluções Tributárias",
+  "description": "Sistema multi-agente para pesquisa e documentação fiscal brasileira com integração N8N",
+  "created_by": "kleber.ribeiro@uptax.com.br",
+  "tags": "multi-agent, n8n, fiscal-research, data-tables"
+}
