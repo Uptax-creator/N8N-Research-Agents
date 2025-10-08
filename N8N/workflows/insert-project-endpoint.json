@@ -8,154 +8,84 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook-project-insert",
-      "name": "Webhook-project-insert",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [240, 300],
-      "webhookId": "insert-project-webhook-v1"
+      "id": "webhook-project-insert",
+      "name": "Webhook-Insert_projects",
+      "webhookId": "insert-project-webhook-v2"
     },
     {
       "parameters": {
-        "operation": "getAll",
-        "dataTableId": "cad_projects"
+        "operation": "get",
+        "dataTableId": "cad_projects",
+        "matchType": "allConditions",
+        "returnAll": true
       },
-      "id": "get-insert-projects",
-      "name": "Get_insert_projects",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
-      "position": [440, 300]
+      "position": [440, 300],
+      "id": "get-insert-projects",
+      "name": "Get_insert_projects"
     },
     {
       "parameters": {
-        "jsCode": "// ========================================\n// INSERT PROJECT - COM VALIDAÇÃO E CÓDIGO EXTERNO\n// ========================================\n\nconst GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/code';\n\n// 1. BUSCAR CÓDIGO DO GITHUB (externo)\nconst code = await this.helpers.httpRequest({\n  method: 'GET',\n  url: `${GITHUB_RAW_BASE}/processors/project-data-mapper-simple-schema.js`,\n  returnFullResponse: false\n});\n\n// 2. EXECUTAR CÓDIGO\neval(code);\n\n// 3. BUSCAR DADOS PRÉ-CARREGADOS DO NODE ANTERIOR\nconst allProjects = $('Get_insert_projects').all().map(item => item.json);\n\n// 4. BUSCAR DADOS DO WEBHOOK (explicitamente)\nconst webhookNode = $('Webhook-project-insert').first().json;\nconst webhookData = webhookNode.body || webhookNode;\n\nconsole.log('[DEBUG] Webhook data:', JSON.stringify(webhookData));\nconsole.log('[DEBUG] All projects count:', allProjects.length);\n\n// 5. MAPEAR E VALIDAR\nconst mappedData = mapProjectData(webhookData, allProjects);\n\n// 6. RETORNAR\nconsole.log('[INSERT_PROJECT] Success:', mappedData.project_id);\nreturn { json: mappedData };"
+        "jsCode": "const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/Uptax-creator/N8N-Research-Agents/clean-deployment/N8N/code';\n\n// 1. BUSCAR CÓDIGO DO GITHUB (externo)\nconst code = await this.helpers.httpRequest({\n  method: 'GET',\n  url: `${GITHUB_RAW_BASE}/processors/project-data-mapper-simple-schema.js`,\n  returnFullResponse: false\n});\n\n// 2. EXECUTAR CÓDIGO\neval(code);\n\n// 3. BUSCAR DADOS PRÉ-CARREGADOS DO NODE ANTERIOR\nconst allProjects = $('Get_insert_projects').all().map(item => item.json);\n\n// 4. PROCESSAR WEBHOOK DATA (buscar direto do Webhook node!)\nconst webhookNode = $('Webhook-Insert_projects').first().json;\nconst webhookData = webhookNode.body || webhookNode;\n\nconsole.log('[DEBUG] Webhook data:', JSON.stringify(webhookData));\nconsole.log('[DEBUG] All projects count:', allProjects.length);\n\n// 5. MAPEAR DADOS\nconst mappedData = mapProjectData(webhookData, allProjects);\n\n// 6. LOG E RETORNO\nconsole.log('[INSERT_PROJECT] Success:', mappedData.project_id);\nreturn { json: mappedData };"
       },
-      "id": "code-insert-project",
-      "name": "Code-insert-project",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [640, 300]
+      "position": [640, 300],
+      "id": "code-insert-project",
+      "name": "Code-insert-project"
     },
     {
       "parameters": {
-        "operation": "create",
         "dataTableId": "cad_projects",
-        "fieldsUi": {
-          "fieldValues": [
-            {
-              "fieldName": "project_id",
-              "fieldValue": "={{ $json.project_id }}"
-            },
-            {
-              "fieldName": "project_name",
-              "fieldValue": "={{ $json.project_name }}"
-            },
-            {
-              "fieldName": "company_name",
-              "fieldValue": "={{ $json.company_name }}"
-            },
-            {
-              "fieldName": "description",
-              "fieldValue": "={{ $json.description }}"
-            },
-            {
-              "fieldName": "created_by",
-              "fieldValue": "={{ $json.created_by }}"
-            },
-            {
-              "fieldName": "is_active",
-              "fieldValue": "={{ $json.is_active }}"
-            },
-            {
-              "fieldName": "tags",
-              "fieldValue": "={{ $json.tags }}"
-            }
-          ]
-        }
-      },
-      "id": "datatable-insert-project",
-      "name": "DataTable-insert-project",
-      "type": "n8n-nodes-base.dataTable",
-      "typeVersion": 1,
-      "position": [840, 300]
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ { \"success\": true, \"project_id\": $json.project_id, \"message\": \"Project created successfully\", \"data\": $json } }}",
+        "columns": {
+          "mappingMode": "autoMapInputData"
+        },
         "options": {}
       },
-      "id": "respond-success",
-      "name": "Respond-success",
-      "type": "n8n-nodes-base.respondToWebhook",
+      "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
-      "position": [1040, 300]
+      "position": [840, 300],
+      "id": "datatable-insert-project",
+      "name": "Insert-Projects"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [1040, 300],
+      "id": "respond-success",
+      "name": "Respond-to-Webhook"
     }
   ],
   "connections": {
-    "Webhook-project-insert": {
-      "main": [
-        [
-          {
-            "node": "Get_insert_projects",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "Webhook-Insert_projects": {
+      "main": [[{"node": "Get_insert_projects", "type": "main", "index": 0}]]
     },
     "Get_insert_projects": {
-      "main": [
-        [
-          {
-            "node": "Code-insert-project",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Code-insert-project", "type": "main", "index": 0}]]
     },
     "Code-insert-project": {
-      "main": [
-        [
-          {
-            "node": "DataTable-insert-project",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Insert-Projects", "type": "main", "index": 0}]]
     },
-    "DataTable-insert-project": {
-      "main": [
-        [
-          {
-            "node": "Respond-success",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "Insert-Projects": {
+      "main": [[{"node": "Respond-to-Webhook", "type": "main", "index": 0}]]
     }
   },
   "pinData": {},
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "staticData": null,
-  "tags": [
-    {
-      "name": "data-tables",
-      "id": "data-tables"
-    },
-    {
-      "name": "insert-project",
-      "id": "insert-project"
-    }
-  ],
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "uptax-meta-agent"
   },
-  "versionId": "1.0.0"
+  "tags": [
+    {"name": "data-tables", "id": "data-tables"},
+    {"name": "insert-project", "id": "insert-project"}
+  ],
+  "versionId": "2.0.0"
 }
